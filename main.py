@@ -172,85 +172,86 @@ async def analyze(
     }
 
 
-# ── POST /analyze/compare — 다중 이미지 비교 ─────────────────
+# ── POST /compare — DB 누적 데이터 기반 비교 분석 ─────────────
 
-@app.post("/analyze/compare", response_model=CompareResponse)
-async def analyze_compare(
-    images: list[UploadFile] = File(..., description="비교할 일보 이미지 (2~5장)"),
-    report_dates: str | None = Form(None, description="날짜 목록 (쉼표 구분)"),
-    department: str | None = Form(None),
-    context: str | None = Form(None),
-):
-    if len(images) < 2:
-        raise HTTPException(400, "최소 2장의 이미지가 필요합니다")
-    if len(images) > MAX_COMPARE_IMAGES:
-        raise HTTPException(400, f"최대 {MAX_COMPARE_IMAGES}장까지 비교 가능합니다")
 
+class CompareRequest(BaseModel):
+    analysis_ids: list[str] | None = None
+    date_from: str | None = None
+    date_to: str | None = None
+    department: str | None = None
+
+
+@app.post("/compare")
+async def compare_analyses(req: CompareRequest):
     start = time.time()
-    dates = []
-    if report_dates:
-        dates = [d.strip() for d in report_dates.split(",")]
 
-    individual_results: list[AnalysisResponse] = []
-    analyses_for_compare: list[dict] = []
+    # 방법 1: analysis_ids 직접 지정
+    if req.analysis_ids:
+        if len(req.analysis_ids) < 2:
+            raise HTTPException(400, "최소 2개의 분석 ID가 필요합니다")
+        analyses = []
+        for aid in req.analysis_ids:
+            a = await db.get_analysis(aid)
+            if not a:
+                raise HTTPException(404, f"분석 결과를 찾을 수 없습니다: {aid}")
+            analyses.append(a)
 
-    for i, img in enumerate(images):
-        img_content = await img.read()
-        _validate_image(img, img_content)
-
-        analysis_id = str(uuid.uuid4())[:8]
-        image_hash = hashlib.sha256(img_content).hexdigest()
-        date = dates[i] if i < len(dates) else None
-
-        extracted = await extract_data(img_content, img.content_type, context)
-        historical = await db.get_recent_extracted(department)
-        insights = await generate_insights(extracted, historical, context)
-
-        elapsed_individual = round(time.time() - start, 2)
-
-        await db.save_analysis(
-            analysis_id=analysis_id,
-            report_date=date,
-            report_type=None,
-            department=department,
-            extracted_data=extracted,
-            insights=insights,
-            processing_time_sec=elapsed_individual,
+    # 방법 2: 날짜 범위로 조회
+    elif req.date_from:
+        analyses = await db.get_analyses_by_date_range(
+            date_from=req.date_from,
+            date_to=req.date_to,
+            department=req.department,
         )
-        await db.save_image_meta(
-            analysis_id=analysis_id,
-            filename=img.filename or f"compare_{i}",
-            mime_type=img.content_type,
-            file_size=len(img_content),
-            image_hash=image_hash,
-        )
+        if len(analyses) < 2:
+            raise HTTPException(400, f"해당 기간에 분석 결과가 {len(analyses)}건뿐입니다. 최소 2건 필요.")
+    else:
+        raise HTTPException(400, "analysis_ids 또는 date_from을 지정하세요")
 
-        result = AnalysisResponse(
-            id=analysis_id,
-            report_date=date,
-            department=department,
-            extracted_data=extracted,
-            insights=insights,
-            processing_time_sec=elapsed_individual,
-        )
-        individual_results.append(result)
-        analyses_for_compare.append({
-            "date": date or f"이미지_{i + 1}",
-            "extracted_data": extracted,
-            "insights": insights,
-        })
+    if len(analyses) > MAX_COMPARE_IMAGES:
+        raise HTTPException(400, f"최대 {MAX_COMPARE_IMAGES}건까지 비교 가능합니다. ({len(analyses)}건 조회됨)")
 
-    # 비교 분석
+    # 비교용 데이터 구성
+    analyses_for_compare = [
+        {
+            "date": a.get("report_date") or a["id"],
+            "department": a.get("department"),
+            "extracted_data": a["extracted_data"],
+            "insights": a["insights"],
+        }
+        for a in analyses
+    ]
+
     comparison = await generate_comparison(analyses_for_compare)
-    total_elapsed = round(time.time() - start, 2)
+    elapsed = round(time.time() - start, 2)
 
-    logger.info("비교 분석 완료: %d장, %.2fs", len(images), total_elapsed)
+    logger.info("비교 분석 완료: %d건, %.2fs", len(analyses), elapsed)
 
-    return CompareResponse(
-        individual=individual_results,
-        comparison=comparison,
-        processing_time_sec=total_elapsed,
-    )
+    return {
+        "analyses": [
+            {
+                "id": a["id"],
+                "report_date": a.get("report_date"),
+                "department": a.get("department"),
+                "summary": a["insights"].get("summary", ""),
+            }
+            for a in analyses
+        ],
+        "comparison": comparison,
+        "processing_time_sec": elapsed,
+    }
+
+
+# ── GET /timeline — 날짜별 누적 데이터 타임라인 ──────────────
+
+@app.get("/timeline")
+async def get_timeline(
+    department: str | None = None,
+    days: int = 30,
+):
+    items = await db.get_timeline(department=department, days=days)
+    return {"items": items, "count": len(items), "days": days}
 
 
 # ── GET /history — 과거 분석 조회 ─────────────────────────────

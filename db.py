@@ -203,6 +203,80 @@ class Database:
             for r in rows
         ]
 
+    # ── 날짜 범위 조회 (비교 분석용) ────────────────────────────
+
+    async def get_analyses_by_date_range(
+        self,
+        date_from: str,
+        date_to: str | None = None,
+        department: str | None = None,
+    ) -> list[dict]:
+        conditions = ["report_date >= ?"]
+        params: list[Any] = [date_from]
+        if date_to:
+            conditions.append("report_date <= ?")
+            params.append(date_to)
+        if department:
+            conditions.append("department = ?")
+            params.append(department)
+        where = " AND ".join(conditions)
+        cur = await self._db.execute(
+            f"SELECT * FROM analyses WHERE {where} ORDER BY report_date",
+            params,
+        )
+        rows = await cur.fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            d["extracted_data"] = json.loads(d["extracted_data"])
+            d["insights"] = json.loads(d["insights"])
+            result.append(d)
+        return result
+
+    # ── 타임라인 (날짜별 누적 현황) ───────────────────────────
+
+    async def get_timeline(
+        self,
+        department: str | None = None,
+        days: int = 30,
+    ) -> list[dict]:
+        conditions = ["report_date >= date('now', 'localtime', ?)"]
+        params: list[Any] = [f"-{days} days"]
+        if department:
+            conditions.append("department = ?")
+            params.append(department)
+        where = " AND ".join(conditions)
+        cur = await self._db.execute(
+            f"""SELECT id, report_date, report_type, department,
+                       extracted_data, insights, processing_time_sec, created_at
+                FROM analyses WHERE {where}
+                ORDER BY report_date""",
+            params,
+        )
+        rows = await cur.fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            extracted = json.loads(d["extracted_data"])
+            ins = json.loads(d["insights"])
+            d["summary"] = ins.get("summary", "")
+            d["anomaly_count"] = len(ins.get("anomalies", []))
+            d["has_high_severity"] = any(
+                a.get("severity") == "HIGH" for a in ins.get("anomalies", [])
+            )
+            # 핵심 수치만 간략히
+            d["key_metrics"] = {}
+            for cat in ("production", "quality", "equipment"):
+                cat_data = extracted.get(cat, {})
+                if cat_data:
+                    d["key_metrics"][cat] = {
+                        k: v for k, v in list(cat_data.items())[:3]
+                    }
+            del d["extracted_data"]
+            del d["insights"]
+            result.append(d)
+        return result
+
     # ── 통계 ───────────────────────────────────────────────────
 
     async def get_stats(self) -> dict:

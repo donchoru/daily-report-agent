@@ -809,7 +809,7 @@
                 </div>
 
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 3: 실데이터 연동 + 자동화</span>
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 3: 실무 적용 준비</span>
                     <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
@@ -817,7 +817,15 @@
                 </div>
 
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 4: 고급 분석 + 확장</span>
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 4: 자동화 + 일보 자동 생성</span>
+                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
+                    <div style="background:rgba(255,255,255,0.1); height:100%; border-radius:8px; width:0%;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 5: 고급 분석 + 확장</span>
                     <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px;">
@@ -874,14 +882,29 @@
             <div class="timeline-item">
                 <div class="timeline-dot dot-planned"></div>
                 <div class="timeline-phase phase-planned">Phase 4 &mdash; 계획</div>
-                <div class="timeline-title">자동화 &amp; 고급 분석</div>
-                <div class="timeline-desc">스케줄러 기반 자동 분석 + 예측 기능</div>
+                <div class="timeline-title">자동화 &amp; 일보 자동 생성</div>
+                <div class="timeline-desc">분석 자동화 + 원하는 기준으로 일보를 AI가 직접 생성</div>
                 <ul class="timeline-tasks">
                     <li class="task-todo">일보 발행 시 자동 분석 트리거 (파일 감시/API)</li>
+                    <li class="task-todo">분석 결과 이메일/Teams/Slack 자동 발송</li>
                     <li class="task-todo">이상치 탐지 시 긴급 알림</li>
-                    <li class="task-todo">과거 일보 이력 기반 트렌드 예측</li>
-                    <li class="task-todo">지식베이스 축적 (과거 이슈 &rarr; 조치안 자동 추천)</li>
+                    <li class="task-todo"><strong>사용자 정의 기준으로 일보 자동 생성</strong> (포함 지표, 기간, 부서 등 선택)</li>
+                    <li class="task-todo"><strong>MES/WMS 실데이터 기반 일보 렌더링</strong> (샘플 &rarr; 실데이터 전환)</li>
+                    <li class="task-todo"><strong>일보 템플릿 관리</strong> (표준/간이/경영진/부서별 등 커스텀 레이아웃)</li>
+                </ul>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot dot-planned"></div>
+                <div class="timeline-phase phase-planned">Phase 5 &mdash; 계획</div>
+                <div class="timeline-title">고급 분석 &amp; 확장</div>
+                <div class="timeline-desc">예측 모델, 지식베이스, 멀티 FAB 통합</div>
+                <ul class="timeline-tasks">
+                    <li class="task-todo">과거 일보 이력 기반 트렌드 예측 (시계열 분석)</li>
+                    <li class="task-todo">지식베이스 축적 (과거 이슈 &rarr; 조치안 자동 추천, RAG)</li>
                     <li class="task-todo">멀티 FAB 통합 대시보드</li>
+                    <li class="task-todo">사용자 권한 관리 (열람/편집/관리자)</li>
+                    <li class="task-todo">모바일 PWA 최적화</li>
                 </ul>
             </div>
         </div>

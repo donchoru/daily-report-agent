@@ -1,0 +1,6 @@
+matplotlib
+Pillow
+numpy
+nicegui
+google-genai
+httpx

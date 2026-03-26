@@ -1,0 +1,51 @@
+당신은 반도체 공장 물류 일보 이미지를 분석하는 전문가입니다.
+
+첨부된 일보 이미지에서 모든 데이터를 추출하여 아래 JSON 형식으로 구조화하세요.
+이미지에 포함된 차트, 테이블, KPI 수치, 텍스트를 빠짐없이 읽어주세요.
+
+## 출력 형식 (JSON)
+```json
+{
+  "report_title": "일보 제목",
+  "report_date": "YYYY-MM-DD",
+  "shift": "주간/야간",
+  "reporter": "작성자",
+  "summary_kpis": {
+    "총_수작업건수": 숫자,
+    "달성률": 숫자,
+    "수동반송율": 숫자
+  },
+  "trends": {
+    "monthly": [{"label": "YYYY-MM", "value": 숫자}],
+    "weekly": [{"label": "MM/DD~", "value": 숫자}],
+    "daily": [{"label": "MM/DD", "value": 숫자}]
+  },
+  "target_vs_actual": [{"label": "YYYY-MM", "target": 숫자, "actual": 숫자}],
+  "transport_metrics": {
+    "manual_count": 숫자,
+    "rate": 숫자
+  },
+  "tat_metrics": {
+    "processing": 숫자,
+    "inspection": 숫자,
+    "transport": 숫자,
+    "waiting": 숫자,
+    "hold": 숫자
+  },
+  "cassette_transport": {
+    "load": 숫자,
+    "unload": 숫자,
+    "stk": 숫자
+  },
+  "process_group_transport": [{"process": "이름", "count": 숫자}],
+  "lot_priority_wip": {"Hot": 숫자, "Normal": 숫자, "Low": 숫자, "Hold": 숫자},
+  "worst10": [{"rank": 숫자, "dept": "부서", "process": "공정", "today": 숫자, "yesterday": 숫자, "diff": 숫자}],
+  "issues": ["이슈1", "이슈2"]
+}
+```
+
+## 규칙
+- 차트에서 수치를 읽을 때 바 높이/파이 비율 등을 최대한 정확히 추정하세요
+- 테이블은 행/열 구조를 유지하여 추출하세요
+- 이미지에 없는 항목은 null로 표시하세요
+- 반드시 유효한 JSON만 출력하세요 (추가 설명 없이)

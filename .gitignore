@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+output/
+uploads/
+gemini-key.txt
+github-token.txt

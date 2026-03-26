@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Report Agent - 물류 수작업일보 AI Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #070b14;
+            --bg-secondary: #0f172a;
+            --glass-bg: rgba(255,255,255,0.05);
+            --glass-border: rgba(255,255,255,0.1);
+            --text-primary: rgba(255,255,255,0.92);
+            --text-secondary: rgba(255,255,255,0.55);
+            --text-muted: rgba(255,255,255,0.35);
+            --accent-blue: #60a5fa;
+            --accent-purple: #a78bfa;
+            --accent-green: #34d399;
+            --accent-yellow: #fbbf24;
+            --accent-red: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Malgun Gothic', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 20%, rgba(59,130,246,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 90% 80%, rgba(139,92,246,0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 50%, rgba(52,211,153,0.05) 0%, transparent 60%);
+            animation: meshFloat 25s ease-in-out infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes meshFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(3%, -2%) scale(1.02); }
+            50% { transform: translate(-2%, 3%) scale(0.98); }
+            75% { transform: translate(1%, -1%) scale(1.01); }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(7,11,20,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--accent-blue); }
+
+        .nav-github {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-github:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 140px 0 80px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            border: 1px solid rgba(52,211,153,0.3);
+            background: rgba(52,211,153,0.08);
+            color: var(--accent-green);
+            margin-bottom: 28px;
+        }
+
+        .hero-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #ffffff 0%, #60a5fa 45%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            line-height: 1.15;
+        }
+
+        .hero-sub {
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+        }
+
+        .hero-tags {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+
+        .tag {
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .tag-blue { border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); color: var(--accent-blue); }
+        .tag-purple { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); color: var(--accent-purple); }
+        .tag-green { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.08); color: var(--accent-green); }
+        .tag-yellow { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); color: var(--accent-yellow); }
+
+        /* ── Section ── */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 48px;
+            line-height: 1.8;
+        }
+
+        /* ── Glass Card ── */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255,255,255,0.18);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+        }
+
+        .glass-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .glass-card p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+
+        .icon-blue { background: rgba(96,165,250,0.15); color: var(--accent-blue); }
+        .icon-purple { background: rgba(167,139,250,0.15); color: var(--accent-purple); }
+        .icon-green { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+        .icon-yellow { background: rgba(251,191,36,0.15); color: var(--accent-yellow); }
+        .icon-red { background: rgba(248,113,113,0.15); color: var(--accent-red); }
+
+        /* ── Grid Layouts ── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.2rem; }
+            .section-title { font-size: 1.6rem; }
+        }
+
+        /* ── Architecture Diagram ── */
+        .arch-diagram {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+        }
+
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .arch-node {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 130px;
+        }
+
+        .arch-arrow {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        .node-input { background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: var(--accent-blue); }
+        .node-process { background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--accent-purple); }
+        .node-ai { background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); color: var(--accent-green); }
+        .node-output { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: var(--accent-yellow); }
+
+        /* ── Timeline / Roadmap ── */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple), var(--accent-green), rgba(255,255,255,0.1));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -33px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid;
+        }
+
+        .dot-done { border-color: var(--accent-green); background: var(--accent-green); }
+        .dot-current { border-color: var(--accent-blue); background: var(--accent-blue); box-shadow: 0 0 12px rgba(96,165,250,0.5); }
+        .dot-planned { border-color: var(--text-muted); background: transparent; }
+
+        .timeline-phase {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .phase-done { color: var(--accent-green); }
+        .phase-current { color: var(--accent-blue); }
+        .phase-planned { color: var(--text-muted); }
+
+        .timeline-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .timeline-tasks {
+            margin-top: 12px;
+            list-style: none;
+        }
+
+        .timeline-tasks li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 6px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-tasks li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1.5px solid;
+        }
+
+        .task-done::before {
+            border-color: var(--accent-green);
+            background: var(--accent-green);
+        }
+
+        .task-done::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 11px;
+            width: 8px;
+            height: 4px;
+            border-left: 2px solid white;
+            border-bottom: 2px solid white;
+            transform: rotate(-45deg);
+        }
+
+        .task-todo::before {
+            border-color: var(--text-muted);
+            background: transparent;
+        }
+
+        /* ── Process Flow ── */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .process-step {
+            text-align: center;
+            padding: 28px 20px;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+        }
+
+        .step-num-blue { background: rgba(96,165,250,0.2); color: var(--accent-blue); }
+        .step-num-purple { background: rgba(167,139,250,0.2); color: var(--accent-purple); }
+        .step-num-green { background: rgba(52,211,153,0.2); color: var(--accent-green); }
+        .step-num-yellow { background: rgba(251,191,36,0.2); color: var(--accent-yellow); }
+
+        .process-step h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .process-step p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ── Tech Stack ── */
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .tech-item:hover {
+            border-color: rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .tech-name { font-weight: 600; font-size: 0.9rem; }
+        .tech-desc { font-size: 0.78rem; color: var(--text-muted); }
+
+        /* ── Code Block ── */
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            color: var(--text-secondary);
+        }
+
+        .code-block .comment { color: rgba(255,255,255,0.3); }
+        .code-block .cmd { color: var(--accent-green); }
+        .code-block .flag { color: var(--accent-yellow); }
+
+        /* ── Stat Row ── */
+        .stat-box {
+            text-align: center;
+            padding: 28px 16px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .val-blue { color: var(--accent-blue); }
+        .val-purple { color: var(--accent-purple); }
+        .val-green { color: var(--accent-green); }
+        .val-yellow { color: var(--accent-yellow); }
+
+        /* ── Table ── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* ── Footer ── */
+        footer {
+            padding: 60px 0 40px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        /* ── Misc ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            margin: 60px 0;
+        }
+
+        .highlight {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .badge-inline {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .badge-done { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+        .badge-wip { background: rgba(96,165,250,0.15); color: var(--accent-blue); }
+        .badge-planned { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+
+        .mobile-menu { display: none; }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-menu { display: block; }
+            .hero { padding: 120px 0 60px; }
+            .arch-flow { flex-direction: column; }
+            .arch-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+    <div class="container">
+        <span class="nav-logo">Daily Report Agent</span>
+        <ul class="nav-links">
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#process">Process</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#quickstart">Quick Start</a></li>
+        </ul>
+        <a href="https://github.com/donchoru/daily-report-agent" class="nav-github" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+        </a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            PoC Project
+        </div>
+        <h1>Daily Report Agent</h1>
+        <p class="hero-sub">Logistics Manual Handling Daily Report AI Agent</p>
+        <p>
+            반도체 물류 현장의 수작업 데이터를 자동 수집하여
+            <strong>AI 기반 일보를 생성</strong>하고,
+            <strong>Gemini Vision OCR</strong>로 기존 일보를 분석하며,
+            <strong>역할별 맞춤 요약</strong>과 <strong>대화형 Q&A</strong>를 제공하는
+            올인원 AI 에이전트입니다.
+        </p>
+        <div class="hero-tags">
+            <span class="tag tag-blue">NiceGUI</span>
+            <span class="tag tag-purple">Gemini 2.0 Flash</span>
+            <span class="tag tag-green">Python 3.11</span>
+            <span class="tag tag-yellow">Matplotlib</span>
+        </div>
+
+        <div class="grid-4" style="max-width: 800px; margin: 0 auto;">
+            <div class="glass-card stat-box">
+                <div class="stat-value val-blue">7+</div>
+                <div class="stat-label">Source Files</div>
+            </div>
+            <div class="glass-card stat-box">
+                <div class="stat-value val-purple">5</div>
+                <div class="stat-label">AI Prompts</div>
+            </div>
+            <div class="glass-card stat-box">
+                <div class="stat-value val-green">2</div>
+                <div class="stat-label">Web Pages</div>
+            </div>
+            <div class="glass-card stat-box">
+                <div class="stat-value val-yellow">13</div>
+                <div class="stat-label">Chart Types</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Overview -->
+<section id="overview">
+    <div class="container">
+        <div class="section-label">Overview</div>
+        <h2 class="section-title">프로젝트 개요</h2>
+        <p class="section-desc">
+            반도체 FAB 물류 현장에서 발생하는 수작업(수동 반송, 우선순위 변경, 기준정보 변경 등)을
+            체계적으로 관리하고, AI가 핵심 이슈를 자동 분석하는 시스템입니다.
+        </p>
+
+        <div class="grid-2" style="margin-bottom: 40px;">
+            <div class="glass-card">
+                <div class="card-icon icon-blue">&#128196;</div>
+                <h3>일보 자동 생성</h3>
+                <p>
+                    날짜 범위를 지정하면 수작업 현황, 반송 트렌드, TAT, Worst 10, KPI 등을
+                    포함한 고품질 PNG 일보 이미지를 자동 생성합니다.
+                    월/주/일별 트렌드 차트 13종이 포함됩니다.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon icon-purple">&#129504;</div>
+                <h3>AI 분석 Agent</h3>
+                <p>
+                    Gemini 2.0 Flash Vision으로 일보 이미지를 OCR하고,
+                    핵심 이슈 3가지를 자동 추출합니다.
+                    임원용/실무자용 맞춤 요약과 대화형 Q&A 챗봇을 제공합니다.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div class="glass-card">
+                <div class="card-icon icon-green">&#128202;</div>
+                <h3>13종 트렌드 차트</h3>
+                <p>수작업 현황, 수동반송율, 우선순위 변경, LOT 우선순위, 기준정보 변경, TAT, 카세트 반송 등 월/주/일별 트렌드</p>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon icon-yellow">&#128172;</div>
+                <h3>대화형 Q&A</h3>
+                <p>일보 데이터를 컨텍스트로 자유로운 질문 가능. 추천 질문 버튼으로 빠른 인사이트 도출</p>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon icon-red">&#127919;</div>
+                <h3>역할별 맞춤 요약</h3>
+                <p>임원용(15초 핵심 브리핑)과 실무자용(즉시 조치 Top 3, TAT 병목) 두 가지 요약 제공</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Architecture -->
+<section id="architecture">
+    <div class="container">
+        <div class="section-label">Architecture</div>
+        <h2 class="section-title">시스템 아키텍처</h2>
+        <p class="section-desc">
+            NiceGUI 기반 웹 앱이 Matplotlib 렌더링 엔진과 Gemini AI 분석 모듈을 연결합니다.
+        </p>
+
+        <div class="arch-diagram">
+            <h3 style="text-align:center; margin-bottom:28px; color: var(--text-secondary); font-size:0.9rem; font-weight:500;">Data Flow</h3>
+            <div class="arch-flow">
+                <div class="arch-node node-input">
+                    &#128196; 일보 이미지<br><small>PNG/JPG Upload</small>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-node node-ai">
+                    &#129504; Gemini Vision<br><small>OCR + 구조화</small>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-node node-process">
+                    &#128300; AI 분석기<br><small>이슈/요약/챗봇</small>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-node node-output">
+                    &#128203; 분석 결과<br><small>대시보드 출력</small>
+                </div>
+            </div>
+
+            <div style="margin-top:32px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.06);">
+                <h3 style="text-align:center; margin-bottom:28px; color: var(--text-secondary); font-size:0.9rem; font-weight:500;">Report Generation Flow</h3>
+                <div class="arch-flow">
+                    <div class="arch-node node-input">
+                        &#128197; 날짜 범위<br><small>사용자 입력</small>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-node node-process">
+                        &#128190; 데이터 생성<br><small>sample_data.py</small>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-node node-ai">
+                        &#127912; Matplotlib<br><small>차트 13종 렌더링</small>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-node node-output">
+                        &#128444; PNG 일보<br><small>다운로드 가능</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Structure -->
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">프로젝트 구조</h3>
+        <div class="code-block">
+<span class="comment">daily-report-agent/</span>
+├── <span class="cmd">main.py</span>              <span class="comment"># CLI 진입점 (단일 일보 생성)</span>
+├── <span class="cmd">app.py</span>               <span class="comment"># NiceGUI 웹앱 (일보 생성기 + AI Agent)</span>
+├── <span class="cmd">ai_analyzer.py</span>       <span class="comment"># Gemini AI 분석 모듈 (OCR/이슈/요약/챗봇)</span>
+├── <span class="cmd">report_generator.py</span>  <span class="comment"># Matplotlib 리포트 이미지 렌더링</span>
+├── <span class="cmd">sample_data.py</span>       <span class="comment"># 시드 기반 샘플 데이터 생성</span>
+├── <span class="cmd">requirements.txt</span>     <span class="comment"># Python 의존성</span>
+├── prompts/
+│   ├── <span class="flag">ocr_extract.txt</span>  <span class="comment"># OCR 구조화 프롬프트</span>
+│   ├── <span class="flag">key_issues.txt</span>   <span class="comment"># 핵심이슈 추출 프롬프트</span>
+│   ├── <span class="flag">executive.txt</span>    <span class="comment"># 임원용 요약 프롬프트</span>
+│   ├── <span class="flag">operator.txt</span>     <span class="comment"># 실무자용 요약 프롬프트</span>
+│   └── <span class="flag">chat_system.txt</span>  <span class="comment"># 챗봇 시스템 프롬프트</span>
+├── output/              <span class="comment"># 생성된 일보 PNG 저장</span>
+└── uploads/             <span class="comment"># 업로드된 일보 이미지</span>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Features Detail -->
+<section id="features">
+    <div class="container">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">주요 기능 상세</h2>
+        <p class="section-desc">
+            현재 구현되어 있는 기능들의 상세 설명입니다.
+        </p>
+
+        <!-- Feature 1: Report Generation -->
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <h3>&#128196; 일보 이미지 자동 생성</h3>
+            <p style="margin-bottom: 20px;">
+                사용자가 시작일과 생성 개수를 지정하면, 날짜별로 고해상도 PNG 일보 이미지를 배치 생성합니다.
+                날짜 기반 시드를 사용하여 동일 날짜에 대해 항상 동일한 데이터를 재현합니다.
+            </p>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>차트 종류</th>
+                        <th>기간</th>
+                        <th>설명</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>수작업 현황 트렌드</td><td>월/주/일</td><td>수작업 건수 바 차트</td></tr>
+                    <tr><td>목표 vs 실적</td><td>13개월</td><td>일평균 건수 비교 (달성률 색상 코딩)</td></tr>
+                    <tr><td>수동반송수/반송율</td><td>월/주/일</td><td>이중 축 차트 (바 + 라인)</td></tr>
+                    <tr><td>반송 우선순위 변경</td><td>월/주/일</td><td>변경 건수 트렌드</td></tr>
+                    <tr><td>LOT 우선순위</td><td>월/주/일</td><td>LOT 우선순위 건수 트렌드</td></tr>
+                    <tr><td>기준정보/가중치 변경</td><td>월/주/일</td><td>기준정보 변경 건수</td></tr>
+                    <tr><td>TAT (Turn Around Time)</td><td>월/주/일</td><td>가공/검사/운반/대기/Hold 스택 바</td></tr>
+                    <tr><td>카세트 수동반송</td><td>월/주/일</td><td>Load/Unload/STK 그룹 바</td></tr>
+                    <tr><td>공정군별 수동반송수</td><td>금일</td><td>DIFF/PHOTO/ETCH 등 7개 공정군</td></tr>
+                    <tr><td>LOT 우선순위별 재공</td><td>금일</td><td>Hot/Normal/Low/Hold 파이 차트</td></tr>
+                    <tr><td>핵심 KPI 요약</td><td>금일</td><td>수작업 건수/달성률/반송율/TAT</td></tr>
+                    <tr><td>Worst 10 테이블</td><td>금일</td><td>부서-공정별 전일비교 증감 상위 10</td></tr>
+                    <tr><td>주요 이슈</td><td>금일</td><td>AGV 고장, 긴급 LOT 등 특이사항</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Feature 2: AI Analysis -->
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <h3>&#129504; AI 분석 Agent (Gemini 2.0 Flash)</h3>
+            <p style="margin-bottom: 20px;">
+                5개의 전문 프롬프트를 활용한 멀티 스텝 AI 분석 파이프라인입니다.
+            </p>
+            <div class="grid-2" style="gap: 16px;">
+                <div style="padding: 16px; background: rgba(96,165,250,0.06); border-radius: 12px; border: 1px solid rgba(96,165,250,0.15);">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-blue);">Step 1. OCR 추출</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Gemini Vision으로 일보 이미지를 읽어 JSON으로 구조화. 차트 값은 바 높이/파이 비율로 추정.
+                    </p>
+                </div>
+                <div style="padding: 16px; background: rgba(167,139,250,0.06); border-radius: 12px; border: 1px solid rgba(167,139,250,0.15);">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-purple);">Step 2. 핵심이슈 추출</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        전일비교 데이터에서 핵심 이슈 3가지 추출. 긴급도별 색상 코딩 (빨강/노랑/초록).
+                    </p>
+                </div>
+                <div style="padding: 16px; background: rgba(52,211,153,0.06); border-radius: 12px; border: 1px solid rgba(52,211,153,0.15);">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-green);">Step 3. 역할별 맞춤 요약</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        임원용: 15초 핵심 브리핑, 월간 달성률, 악화 알림.
+                        실무자용: 즉시 조치 Top 3, TAT 병목 구간.
+                    </p>
+                </div>
+                <div style="padding: 16px; background: rgba(251,191,36,0.06); border-radius: 12px; border: 1px solid rgba(251,191,36,0.15);">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-yellow);">Step 4. 대화형 챗봇</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        일보 데이터를 컨텍스트로 자유 질문. 대화 히스토리 유지. 추천 질문 4종 제공.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3: UI -->
+        <div class="glass-card">
+            <h3>&#127912; Premium Glassmorphism UI</h3>
+            <p>
+                다크 테마 기반의 Glassmorphism 디자인 시스템을 적용했습니다.
+                Animated Mesh Gradient 배경, Floating Particles 효과, Glass 카드,
+                Progress Bar 애니메이션, Fade-up 전환 등 프리미엄 UX를 제공합니다.
+                NiceGUI + Quasar 프레임워크 기반으로 반응형 레이아웃을 지원합니다.
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Current Process -->
+<section id="process">
+    <div class="container">
+        <div class="section-label">Current Process</div>
+        <h2 class="section-title">현재 동작 프로세스</h2>
+        <p class="section-desc">
+            두 가지 메인 워크플로우가 웹 앱에서 동작합니다.
+        </p>
+
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">
+            Workflow 1: 일보 생성기 <span class="badge-inline badge-done">/ 페이지</span>
+        </h3>
+        <div class="process-grid" style="margin-bottom: 48px;">
+            <div class="glass-card process-step">
+                <div class="step-number step-num-blue">1</div>
+                <h4>날짜/개수 입력</h4>
+                <p>시작일(YYYY-MM-DD)과 생성 개수(1~90일)를 입력합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-purple">2</div>
+                <h4>데이터 생성</h4>
+                <p>날짜 시드 기반으로 10개 카테고리의 샘플 데이터를 생성합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-green">3</div>
+                <h4>차트 렌더링</h4>
+                <p>Matplotlib로 22x72 인치 캔버스에 13종 차트 + 테이블을 렌더링합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-yellow">4</div>
+                <h4>결과 출력</h4>
+                <p>PNG 저장, 통계 요약(총 수작업/평균 달성률), 카드형 결과 목록을 표시합니다.</p>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">
+            Workflow 2: AI 분석 Agent <span class="badge-inline badge-wip">/ai 페이지</span>
+        </h3>
+        <div class="process-grid">
+            <div class="glass-card process-step">
+                <div class="step-number step-num-blue">1</div>
+                <h4>이미지 업로드</h4>
+                <p>일보 PNG/JPG를 업로드하거나, "샘플 데이터로 테스트" 버튼으로 바로 시작합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-purple">2</div>
+                <h4>OCR + 구조화</h4>
+                <p>Gemini Vision이 이미지를 읽어 JSON으로 구조화합니다. 차트 값도 추정 추출합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-green">3</div>
+                <h4>AI 분석</h4>
+                <p>핵심이슈 3가지 추출 + 임원용/실무자용 맞춤 요약을 병렬 생성합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-yellow">4</div>
+                <h4>대화형 Q&A</h4>
+                <p>분석 결과를 컨텍스트로 자유 질문. 추천 질문 버튼 4종으로 빠른 인사이트를 도출합니다.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Tech Stack -->
+<section id="techstack">
+    <div class="container">
+        <div class="section-label">Tech Stack</div>
+        <h2 class="section-title">기술 스택</h2>
+        <p class="section-desc">
+            가볍고 효과적인 기술 조합으로 빠르게 프로토타이핑했습니다.
+        </p>
+
+        <div class="grid-3" style="margin-bottom: 24px;">
+            <div class="tech-item">
+                <div class="card-icon icon-green" style="margin-bottom:0; flex-shrink:0;">&#128013;</div>
+                <div>
+                    <div class="tech-name">Python 3.11</div>
+                    <div class="tech-desc">메인 런타임</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-blue" style="margin-bottom:0; flex-shrink:0;">&#127760;</div>
+                <div>
+                    <div class="tech-name">NiceGUI</div>
+                    <div class="tech-desc">웹 프레임워크 (FastAPI 기반)</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-purple" style="margin-bottom:0; flex-shrink:0;">&#129504;</div>
+                <div>
+                    <div class="tech-name">Gemini 2.0 Flash</div>
+                    <div class="tech-desc">AI 모델 (OCR + 분석 + 챗봇)</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-yellow" style="margin-bottom:0; flex-shrink:0;">&#128202;</div>
+                <div>
+                    <div class="tech-name">Matplotlib</div>
+                    <div class="tech-desc">차트/리포트 이미지 렌더링</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-red" style="margin-bottom:0; flex-shrink:0;">&#128248;</div>
+                <div>
+                    <div class="tech-name">Pillow</div>
+                    <div class="tech-desc">이미지 처리</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-green" style="margin-bottom:0; flex-shrink:0;">&#128274;</div>
+                <div>
+                    <div class="tech-name">httpx + SSL</div>
+                    <div class="tech-desc">사내망 SSL 우회 HTTP 클라이언트</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Roadmap -->
+<section id="roadmap">
+    <div class="container">
+        <div class="section-label">Roadmap</div>
+        <h2 class="section-title">로드맵</h2>
+        <p class="section-desc">
+            프로젝트의 현재 진행 상태와 앞으로의 계획입니다.
+        </p>
+
+        <div class="timeline">
+            <!-- Phase 1 -->
+            <div class="timeline-item">
+                <div class="timeline-dot dot-done"></div>
+                <div class="timeline-phase phase-done">Phase 1 &mdash; 완료</div>
+                <div class="timeline-title">핵심 기능 구현</div>
+                <div class="timeline-desc">일보 이미지 자동 생성 + 웹 UI 기본 구축</div>
+                <ul class="timeline-tasks">
+                    <li class="task-done">Matplotlib 기반 13종 차트 렌더링 엔진 (report_generator.py)</li>
+                    <li class="task-done">날짜 시드 기반 샘플 데이터 생성기 (sample_data.py)</li>
+                    <li class="task-done">CLI 실행 지원 (main.py)</li>
+                    <li class="task-done">NiceGUI 웹 앱 기본 구조 (일보 생성기 페이지)</li>
+                    <li class="task-done">Glassmorphism 프리미엄 UI/UX</li>
+                    <li class="task-done">배치 일보 생성 (최대 90일치)</li>
+                    <li class="task-done">프로그레스 바 + 실시간 통계</li>
+                </ul>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="timeline-item">
+                <div class="timeline-dot dot-done"></div>
+                <div class="timeline-phase phase-done">Phase 2 &mdash; 완료</div>
+                <div class="timeline-title">AI 분석 Agent</div>
+                <div class="timeline-desc">Gemini Vision OCR + 멀티 스텝 분석 파이프라인</div>
+                <ul class="timeline-tasks">
+                    <li class="task-done">Gemini 2.0 Flash Vision OCR (이미지 &rarr; 구조화 JSON)</li>
+                    <li class="task-done">핵심이슈 자동 추출 (3가지, 긴급도별 색상 코딩)</li>
+                    <li class="task-done">역할별 맞춤 요약 (임원용/실무자용)</li>
+                    <li class="task-done">대화형 Q&A 챗봇 (히스토리 유지, 추천 질문)</li>
+                    <li class="task-done">전일비교 자동 계산 + 악화 지표 알림</li>
+                    <li class="task-done">5개 전문 프롬프트 템플릿 설계</li>
+                </ul>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="timeline-item">
+                <div class="timeline-dot dot-current"></div>
+                <div class="timeline-phase phase-current">Phase 3 &mdash; 진행 예정</div>
+                <div class="timeline-title">실데이터 연동</div>
+                <div class="timeline-desc">샘플 데이터를 실제 데이터 소스로 교체</div>
+                <ul class="timeline-tasks">
+                    <li class="task-todo">MES/WMS 시스템 API 연동 (수작업 로그 실시간 수집)</li>
+                    <li class="task-todo">Oracle/PostgreSQL DB 직접 조회 모듈</li>
+                    <li class="task-todo">AGV/OHT 반송 시스템 데이터 연동</li>
+                    <li class="task-todo">데이터 정합성 검증 로직</li>
+                    <li class="task-todo">날짜별 데이터 캐싱 (중복 생성 방지)</li>
+                </ul>
+            </div>
+
+            <!-- Phase 4 -->
+            <div class="timeline-item">
+                <div class="timeline-dot dot-planned"></div>
+                <div class="timeline-phase phase-planned">Phase 4 &mdash; 계획</div>
+                <div class="timeline-title">자동화 파이프라인</div>
+                <div class="timeline-desc">스케줄러 기반 자동 일보 생성/배포</div>
+                <ul class="timeline-tasks">
+                    <li class="task-todo">매일 정시 자동 일보 생성 (스케줄러)</li>
+                    <li class="task-todo">이메일/Teams/Slack 자동 발송</li>
+                    <li class="task-todo">이상치 탐지 시 긴급 알림</li>
+                    <li class="task-todo">일보 히스토리 아카이브 및 검색</li>
+                    <li class="task-todo">PDF 변환 및 인쇄 최적화</li>
+                </ul>
+            </div>
+
+            <!-- Phase 5 -->
+            <div class="timeline-item">
+                <div class="timeline-dot dot-planned"></div>
+                <div class="timeline-phase phase-planned">Phase 5 &mdash; 계획</div>
+                <div class="timeline-title">고급 분석 & 확장</div>
+                <div class="timeline-desc">예측 분석, 멀티 팩토리 지원</div>
+                <ul class="timeline-tasks">
+                    <li class="task-todo">수작업 건수 예측 모델 (시계열 분석)</li>
+                    <li class="task-todo">이상 패턴 자동 감지 (Anomaly Detection)</li>
+                    <li class="task-todo">멀티 FAB/라인 통합 대시보드</li>
+                    <li class="task-todo">사용자 권한 관리 (열람/편집/관리자)</li>
+                    <li class="task-todo">모바일 최적화 (PWA)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Next Steps / Improvements -->
+<section id="next-steps">
+    <div class="container">
+        <div class="section-label">Next Steps</div>
+        <h2 class="section-title">다음에 해야 할 일</h2>
+        <p class="section-desc">
+            현재 PoC 단계에서 프로덕션으로 가기 위한 우선순위 높은 작업 목록입니다.
+        </p>
+
+        <div class="grid-2">
+            <div class="glass-card">
+                <div class="card-icon icon-red">&#128293;</div>
+                <h3>
+                    <span class="badge-inline" style="background: rgba(248,113,113,0.2); color: var(--accent-red);">HIGH</span>
+                    실데이터 연동
+                </h3>
+                <p>
+                    현재 <code>sample_data.py</code>의 랜덤 데이터를 실제 MES/WMS 시스템 데이터로 교체.
+                    Oracle JDBC 또는 REST API를 통해 수작업 로그를 실시간 수집하는 데이터 어댑터 레이어를 구현해야 합니다.
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-icon icon-red">&#128293;</div>
+                <h3>
+                    <span class="badge-inline" style="background: rgba(248,113,113,0.2); color: var(--accent-red);">HIGH</span>
+                    인증 및 보안
+                </h3>
+                <p>
+                    사내 SSO/LDAP 연동으로 사용자 인증 추가. API 키 환경 변수화.
+                    업로드 파일 검증. 현재 Gemini API 키가 파일로 관리되므로 시크릿 매니저 연동 필요.
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-icon icon-yellow">&#9889;</div>
+                <h3>
+                    <span class="badge-inline" style="background: rgba(251,191,36,0.2); color: var(--accent-yellow);">MED</span>
+                    자동 스케줄링
+                </h3>
+                <p>
+                    APScheduler 또는 cron 기반으로 매일 정시(교대 시간) 자동 일보 생성.
+                    생성 완료 시 이메일/Teams Webhook으로 알림 발송.
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-icon icon-yellow">&#9889;</div>
+                <h3>
+                    <span class="badge-inline" style="background: rgba(251,191,36,0.2); color: var(--accent-yellow);">MED</span>
+                    OCR 정확도 개선
+                </h3>
+                <p>
+                    현재 단일 이미지 OCR에서 멀티 페이지/PDF 지원 확장.
+                    OCR 결과를 사용자가 수정 가능한 에디터 추가.
+                    구조화 실패 시 fallback 전략 강화.
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-icon icon-blue">&#128161;</div>
+                <h3>
+                    <span class="badge-inline" style="background: rgba(96,165,250,0.2); color: var(--accent-blue);">LOW</span>
+                    일보 커스터마이징
+                </h3>
+                <p>
+                    차트 종류/순서/색상을 사용자가 설정 가능하게. 부서/라인별 필터.
+                    일보 템플릿 관리 (표준/간이/경영진 등).
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-icon icon-blue">&#128161;</div>
+                <h3>
+                    <span class="badge-inline" style="background: rgba(96,165,250,0.2); color: var(--accent-blue);">LOW</span>
+                    테스트 & CI/CD
+                </h3>
+                <p>
+                    pytest 기반 유닛 테스트 작성. GitHub Actions CI 파이프라인 구축.
+                    Docker 컨테이너화로 배포 표준화.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Nice to Have -->
+<section id="enhancements">
+    <div class="container">
+        <div class="section-label">Enhancements</div>
+        <h2 class="section-title">추가되면 좋은 기능들</h2>
+        <p class="section-desc">
+            향후 프로덕션 전환 시 고려할 수 있는 확장 기능입니다.
+        </p>
+
+        <div class="grid-3">
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128200;</div>
+                <h3 style="justify-content:center;">수작업 예측 모델</h3>
+                <p>과거 데이터 기반 시계열 예측으로 내일/다음 주 수작업 건수를 사전 예측. 인력 배치 최적화에 활용.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128680;</div>
+                <h3 style="justify-content:center;">이상치 자동 알림</h3>
+                <p>통계적 이상치 탐지 (Z-score, IQR)로 비정상 패턴 감지 시 즉시 알림. Slack/Teams/카카오워크 연동.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128203;</div>
+                <h3 style="justify-content:center;">PDF/Excel 내보내기</h3>
+                <p>PNG 외에 PDF, Excel 형식 다운로드 지원. 인쇄 최적화 레이아웃. 월간/주간 종합 보고서.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#127891;</div>
+                <h3 style="justify-content:center;">지식베이스 축적</h3>
+                <p>과거 이슈와 조치 결과를 DB에 축적. 유사 이슈 발생 시 과거 조치안 자동 추천. RAG 기반 검색.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128241;</div>
+                <h3 style="justify-content:center;">모바일 PWA</h3>
+                <p>현장 작업자가 모바일에서 일보를 확인하고, 이슈를 바로 보고할 수 있는 PWA. 오프라인 캐시 지원.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128101;</div>
+                <h3 style="justify-content:center;">멀티 FAB 대시보드</h3>
+                <p>여러 FAB/라인의 일보를 통합 조회하는 상위 대시보드. 교차 FAB 비교 분석. 경영진 종합 뷰.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128268;</div>
+                <h3 style="justify-content:center;">Jira/Confluence 연동</h3>
+                <p>이슈 자동 티켓 생성. 일보를 Confluence 페이지에 자동 게시. ITSM 워크플로우 연결.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#127916;</div>
+                <h3 style="justify-content:center;">실시간 대시보드</h3>
+                <p>WebSocket 기반 실시간 데이터 스트리밍. 수작업 발생 즉시 대시보드 갱신. 라이브 모니터링.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">&#128373;</div>
+                <h3 style="justify-content:center;">근본 원인 분석</h3>
+                <p>수작업 증가의 근본 원인을 AI가 자동 추론. 설비 이력, 인원 배치, 환경 변수를 종합 분석.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Quick Start -->
+<section id="quickstart">
+    <div class="container">
+        <div class="section-label">Quick Start</div>
+        <h2 class="section-title">시작하기</h2>
+        <p class="section-desc">
+            로컬 환경에서 프로젝트를 실행하는 방법입니다.
+        </p>
+
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <h3>&#9889; 설치 및 실행</h3>
+            <div class="code-block" style="margin-top: 16px;">
+<span class="comment"># 1. 저장소 클론</span>
+<span class="cmd">git clone</span> https://github.com/donchoru/daily-report-agent.git
+<span class="cmd">cd</span> daily-report-agent
+
+<span class="comment"># 2. 가상환경 생성 (Python 3.11)</span>
+<span class="cmd">uv venv</span> <span class="flag">--python python3.11</span> .venv
+<span class="cmd">source</span> .venv/bin/activate  <span class="comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="comment"># 3. 의존성 설치</span>
+<span class="cmd">uv pip install</span> <span class="flag">-r</span> requirements.txt
+
+<span class="comment"># 4. Gemini API 키 설정</span>
+<span class="cmd">echo</span> <span class="flag">"YOUR_GEMINI_API_KEY"</span> > gemini-key.txt
+
+<span class="comment"># 5. 웹 앱 실행</span>
+<span class="cmd">python</span> app.py
+<span class="comment"># http://localhost:8090 에서 접속</span>
+
+<span class="comment"># 또는 CLI로 단일 일보 생성</span>
+<span class="cmd">python</span> main.py <span class="flag">--date</span> 2026-03-20 <span class="flag">--output</span> my_report.png
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>&#128218; 의존성</h3>
+                <div style="margin-top: 12px;">
+                    <div class="tech-item" style="margin-bottom: 8px;">
+                        <div class="tech-name">matplotlib</div>
+                        <div class="tech-desc">차트 렌더링</div>
+                    </div>
+                    <div class="tech-item" style="margin-bottom: 8px;">
+                        <div class="tech-name">Pillow</div>
+                        <div class="tech-desc">이미지 처리</div>
+                    </div>
+                    <div class="tech-item" style="margin-bottom: 8px;">
+                        <div class="tech-name">numpy</div>
+                        <div class="tech-desc">수치 계산</div>
+                    </div>
+                    <div class="tech-item" style="margin-bottom: 8px;">
+                        <div class="tech-name">nicegui</div>
+                        <div class="tech-desc">웹 프레임워크</div>
+                    </div>
+                    <div class="tech-item" style="margin-bottom: 8px;">
+                        <div class="tech-name">google-genai</div>
+                        <div class="tech-desc">Gemini API 클라이언트</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-name">httpx</div>
+                        <div class="tech-desc">HTTP 클라이언트 (SSL)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card">
+                <h3>&#128272; 사전 요구사항</h3>
+                <ul style="list-style: none; margin-top: 12px;">
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary);">
+                        <strong style="color: var(--text-primary);">Python 3.11+</strong> &mdash; 메인 런타임
+                    </li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary);">
+                        <strong style="color: var(--text-primary);">Gemini API Key</strong> &mdash; Google AI Studio에서 발급
+                    </li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary);">
+                        <strong style="color: var(--text-primary);">한글 폰트</strong> &mdash; Malgun Gothic / NanumGothic
+                    </li>
+                    <li style="padding: 8px 0; color: var(--text-secondary);">
+                        <strong style="color: var(--text-primary);">사내망 환경</strong> &mdash; SSL 우회가 자동 설정됨
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <p style="margin-bottom: 8px;">
+            <strong style="color: var(--text-secondary);">Daily Report Agent</strong> &mdash; 물류 수작업일보 AI Agent
+        </p>
+        <p>
+            Built with Python + NiceGUI + Gemini 2.0 Flash &nbsp;|&nbsp;
+            <a href="https://github.com/donchoru/daily-report-agent" target="_blank">GitHub Repository</a>
+        </p>
+        <p style="margin-top: 16px; font-size: 0.75rem;">
+            &copy; 2026 donchoru. PoC Project.
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>

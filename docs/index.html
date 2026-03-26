@@ -648,12 +648,14 @@
     <div class="container">
         <span class="nav-logo">Daily Report Agent</span>
         <ul class="nav-links">
+            <li><a href="#background">Background</a></li>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#features">Features</a></li>
             <li><a href="#architecture">Architecture</a></li>
-            <li><a href="#process">Process</a></li>
+            <li><a href="#screenshots">Demo</a></li>
+            <li><a href="#progress">Progress</a></li>
             <li><a href="#roadmap">Roadmap</a></li>
-            <li><a href="#quickstart">Quick Start</a></li>
+            <li><a href="#impact">Impact</a></li>
+            <li><a href="#risks">Risks</a></li>
         </ul>
         <a href="https://github.com/donchoru/daily-report-agent" class="nav-github" target="_blank">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -701,6 +703,94 @@
             <div class="glass-card stat-box">
                 <div class="stat-value val-yellow">13</div>
                 <div class="stat-label">Chart Types</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Background: 개발 배경 -->
+<section id="background">
+    <div class="container">
+        <div class="section-label">Background</div>
+        <h2 class="section-title">개발 배경 및 목적</h2>
+        <p class="section-desc">
+            반도체 FAB 물류 현장에서 발생하는 수작업 일보의 작성/분석 과정에서
+            반복적인 비효율과 정보 전달 지연 문제를 해결하기 위해 시작되었습니다.
+        </p>
+
+        <div class="grid-2" style="margin-bottom: 48px;">
+            <!-- As-Is -->
+            <div class="glass-card" style="border-color: rgba(248,113,113,0.25);">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                    <span style="font-size:1.5rem;">&#128308;</span>
+                    <h3 style="margin:0;">As-Is (현재 문제점)</h3>
+                </div>
+                <ul style="list-style:none;">
+                    <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
+                        <strong style="color:var(--accent-red);">수동 일보 작성</strong><br>
+                        교대조별로 Excel/수기로 일보를 작성. 평균 <strong>30~60분/일</strong> 소요
+                    </li>
+                    <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
+                        <strong style="color:var(--accent-red);">데이터 불일치</strong><br>
+                        작성자마다 포맷/기준이 달라 시계열 비교 어려움. 전일비교 수동 계산 오류 빈발
+                    </li>
+                    <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
+                        <strong style="color:var(--accent-red);">분석 지연</strong><br>
+                        핵심 이슈 파악에 추가 시간 필요. 임원/실무자별 맞춤 리포트 별도 작성
+                    </li>
+                    <li style="padding:10px 0; color:var(--text-secondary);">
+                        <strong style="color:var(--accent-red);">이력 관리 부재</strong><br>
+                        과거 일보 검색/비교 어려움. 트렌드 분석이 사실상 불가능
+                    </li>
+                </ul>
+            </div>
+
+            <!-- To-Be -->
+            <div class="glass-card" style="border-color: rgba(52,211,153,0.25);">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                    <span style="font-size:1.5rem;">&#128994;</span>
+                    <h3 style="margin:0;">To-Be (목표 상태)</h3>
+                </div>
+                <ul style="list-style:none;">
+                    <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
+                        <strong style="color:var(--accent-green);">자동 일보 생성</strong><br>
+                        데이터 수집부터 차트 렌더링까지 <strong>1분 이내</strong> 자동 완료
+                    </li>
+                    <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
+                        <strong style="color:var(--accent-green);">표준화된 포맷</strong><br>
+                        13종 차트 + KPI + Worst 10으로 일관된 일보 품질 보장
+                    </li>
+                    <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
+                        <strong style="color:var(--accent-green);">AI 즉시 분석</strong><br>
+                        핵심이슈 3가지 자동 추출. 역할별 맞춤 요약. 대화형 Q&A
+                    </li>
+                    <li style="padding:10px 0; color:var(--text-secondary);">
+                        <strong style="color:var(--accent-green);">트렌드 가시화</strong><br>
+                        월/주/일별 트렌드 자동 비교. 전일대비 악화 지표 즉시 알림
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 핵심 개발 방향 -->
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">핵심 개발 방향</h3>
+        <div class="grid-3">
+            <div class="glass-card" style="text-align:center; padding:28px 20px;">
+                <div style="font-size:2rem; margin-bottom:12px;">&#9889;</div>
+                <h3 style="justify-content:center;">속도 우선</h3>
+                <p>PoC 빠른 검증을 위해 NiceGUI + Matplotlib 조합으로 최소 코드, 최대 기능 구현. 별도 프론트엔드 없이 Python Only.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding:28px 20px;">
+                <div style="font-size:2rem; margin-bottom:12px;">&#129504;</div>
+                <h3 style="justify-content:center;">AI 네이티브</h3>
+                <p>단순 자동화가 아닌 AI가 데이터를 이해하고 인사이트를 제공하는 구조. OCR, 분석, 요약, 챗봇 4단계 파이프라인.</p>
+            </div>
+            <div class="glass-card" style="text-align:center; padding:28px 20px;">
+                <div style="font-size:2rem; margin-bottom:12px;">&#128260;</div>
+                <h3 style="justify-content:center;">확장 가능</h3>
+                <p>데이터 소스만 교체하면 실서비스 전환 가능한 구조. 프롬프트 템플릿 분리로 도메인 커스터마이징 용이.</p>
             </div>
         </div>
     </div>
@@ -928,6 +1018,69 @@
 
 <div class="divider"></div>
 
+<!-- Screenshots / Demo -->
+<section id="screenshots">
+    <div class="container">
+        <div class="section-label">Demo</div>
+        <h2 class="section-title">실제 화면 및 산출물</h2>
+        <p class="section-desc">
+            현재 구현된 시스템의 실제 출력물과 UI 화면입니다.
+        </p>
+
+        <!-- Report Sample -->
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <h3>&#128444; 자동 생성 일보 (PNG 출력물)</h3>
+            <p style="margin-bottom: 20px;">
+                아래는 시스템이 자동 생성한 실제 일보 이미지입니다. 13종의 차트와 KPI, Worst 10 테이블, 주요 이슈가 하나의 이미지에 포함됩니다.
+            </p>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                <div style="flex:1; min-width:280px; max-width:400px;">
+                    <div style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center;">
+                        <img src="images/report_sample.png" alt="일보 샘플 1" style="width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+                        <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">2026-03-20 일보</p>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:280px; max-width:400px;">
+                    <div style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center;">
+                        <img src="images/report_sample2.png" alt="일보 샘플 2" style="width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+                        <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">2026-03-21 일보</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web UI Description -->
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>&#127760; 일보 생성기 페이지 (<code>/</code>)</h3>
+                <p style="margin-bottom:12px;">웹 브라우저에서 접속하는 메인 페이지입니다.</p>
+                <ul style="list-style:none; font-size:0.88rem; color:var(--text-secondary);">
+                    <li style="padding:6px 0;">&#8226; 시작일/생성 개수 입력 폼</li>
+                    <li style="padding:6px 0;">&#8226; 실시간 프로그레스 바 (배치 생성)</li>
+                    <li style="padding:6px 0;">&#8226; 통계 대시보드 (생성 완료/총 수작업/평균 달성률)</li>
+                    <li style="padding:6px 0;">&#8226; 결과 카드 목록 (썸네일 + 핵심 지표 뱃지)</li>
+                    <li style="padding:6px 0;">&#8226; PNG 개별 다운로드 버튼</li>
+                    <li style="padding:6px 0;">&#8226; Glassmorphism 다크 테마 + 파티클 애니메이션</li>
+                </ul>
+            </div>
+            <div class="glass-card">
+                <h3>&#129504; AI 분석 Agent 페이지 (<code>/ai</code>)</h3>
+                <p style="margin-bottom:12px;">일보 이미지를 AI가 분석하는 페이지입니다.</p>
+                <ul style="list-style:none; font-size:0.88rem; color:var(--text-secondary);">
+                    <li style="padding:6px 0;">&#8226; 일보 이미지 업로드 (PNG/JPG 드래그 앤 드롭)</li>
+                    <li style="padding:6px 0;">&#8226; "샘플 데이터로 테스트" 원클릭 시작</li>
+                    <li style="padding:6px 0;">&#8226; OCR 진행 상태 표시 (3단계 로딩)</li>
+                    <li style="padding:6px 0;">&#8226; 핵심이슈 카드 (긴급도별 색상 코딩)</li>
+                    <li style="padding:6px 0;">&#8226; 임원용/실무자용 탭 요약</li>
+                    <li style="padding:6px 0;">&#8226; 대화형 챗봇 (추천 질문 4종 + 자유 질문)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
 <!-- Current Process -->
 <section id="process">
     <div class="container">
@@ -1043,6 +1196,125 @@
                 <div>
                     <div class="tech-name">httpx + SSL</div>
                     <div class="tech-desc">사내망 SSL 우회 HTTP 클라이언트</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Development Progress -->
+<section id="progress">
+    <div class="container">
+        <div class="section-label">Development Progress</div>
+        <h2 class="section-title">개발 진행 경과</h2>
+        <p class="section-desc">
+            프로젝트 착수부터 현재까지의 개발 타임라인입니다.
+        </p>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot dot-done"></div>
+                <div class="timeline-phase phase-done">2026-03-19 (Day 1)</div>
+                <div class="timeline-title">프로젝트 착수 & 핵심 엔진 구현</div>
+                <div class="timeline-desc">프로젝트 구조 설계 및 핵심 모듈 개발 완료</div>
+                <ul class="timeline-tasks">
+                    <li class="task-done">프로젝트 구조 설계 및 초기화</li>
+                    <li class="task-done">sample_data.py &mdash; 날짜 시드 기반 10개 카테고리 데이터 생성기</li>
+                    <li class="task-done">report_generator.py &mdash; Matplotlib 13종 차트 렌더링 엔진</li>
+                    <li class="task-done">main.py &mdash; CLI 실행 지원</li>
+                    <li class="task-done">app.py &mdash; NiceGUI 웹 앱 (일보 생성기 페이지)</li>
+                    <li class="task-done">Glassmorphism Premium UI/UX 디자인</li>
+                    <li class="task-done">배치 생성 + 프로그레스 바 + 통계 대시보드</li>
+                    <li class="task-done">ai_analyzer.py &mdash; Gemini 2.0 Flash 연동</li>
+                    <li class="task-done">5개 전문 프롬프트 템플릿 설계 (OCR/이슈/임원/실무/챗봇)</li>
+                    <li class="task-done">AI 분석 Agent 페이지 (/ai) 구현</li>
+                </ul>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot dot-done"></div>
+                <div class="timeline-phase phase-done">2026-03-20 (Day 2)</div>
+                <div class="timeline-title">AI 분석 고도화 & 안정화</div>
+                <div class="timeline-desc">전일비교 로직 강화 및 AI 컨텍스트 최적화</div>
+                <ul class="timeline-tasks">
+                    <li class="task-done">전일비교 자동 계산 + 악화 지표 알림 로직</li>
+                    <li class="task-done">AI 컨텍스트에 비교 요약 데이터 자동 주입</li>
+                    <li class="task-done">역할별 요약 병렬 생성 (asyncio.gather)</li>
+                    <li class="task-done">대화형 챗봇 히스토리 유지 + 추천 질문</li>
+                    <li class="task-done">일보 이미지 5일치 배치 생성 검증</li>
+                </ul>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot dot-done"></div>
+                <div class="timeline-phase phase-done">2026-03-26 (Day 3)</div>
+                <div class="timeline-title">GitHub 배포 & 문서화</div>
+                <div class="timeline-desc">코드 공개 및 GitHub Pages 프로젝트 문서 사이트 구축</div>
+                <ul class="timeline-tasks">
+                    <li class="task-done">GitHub 레포지토리 생성 및 코드 Push</li>
+                    <li class="task-done">GitHub Pages 프로젝트 문서 사이트 구축</li>
+                    <li class="task-done">발표용 종합 문서 작성 (배경/진행/로드맵/기대효과)</li>
+                </ul>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot dot-current"></div>
+                <div class="timeline-phase phase-current">Next &mdash; 진행 예정</div>
+                <div class="timeline-title">실데이터 연동 & 자동화</div>
+                <div class="timeline-desc">PoC에서 실서비스로 전환하기 위한 단계</div>
+                <ul class="timeline-tasks">
+                    <li class="task-todo">MES/WMS 시스템 데이터 소스 연동</li>
+                    <li class="task-todo">자동 스케줄링 (교대 시간 기준)</li>
+                    <li class="task-todo">이메일/Teams 알림 발송</li>
+                    <li class="task-todo">사용자 인증 및 권한 관리</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 진행률 요약 -->
+        <div class="glass-card" style="margin-top: 40px;">
+            <h3>&#128200; 전체 진행률 요약</h3>
+            <div style="margin-top: 20px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 1: 핵심 기능 구현</span>
+                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--accent-green);">100%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
+                    <div style="background:linear-gradient(90deg, #34d399, #059669); height:100%; border-radius:8px; width:100%;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 2: AI 분석 Agent</span>
+                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--accent-green);">100%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
+                    <div style="background:linear-gradient(90deg, #34d399, #059669); height:100%; border-radius:8px; width:100%;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 3: 실데이터 연동</span>
+                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
+                    <div style="background:rgba(255,255,255,0.1); height:100%; border-radius:8px; width:0%;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 4: 자동화 파이프라인</span>
+                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
+                    <div style="background:rgba(255,255,255,0.1); height:100%; border-radius:8px; width:0%;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 5: 고급 분석 & 확장</span>
+                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px;">
+                    <div style="background:rgba(255,255,255,0.1); height:100%; border-radius:8px; width:0%;"></div>
                 </div>
             </div>
         </div>
@@ -1286,6 +1558,168 @@
                 <div style="font-size: 2rem; margin-bottom: 12px;">&#128373;</div>
                 <h3 style="justify-content:center;">근본 원인 분석</h3>
                 <p>수작업 증가의 근본 원인을 AI가 자동 추론. 설비 이력, 인원 배치, 환경 변수를 종합 분석.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Expected Impact -->
+<section id="impact">
+    <div class="container">
+        <div class="section-label">Expected Impact</div>
+        <h2 class="section-title">기대 효과</h2>
+        <p class="section-desc">
+            시스템 도입 시 예상되는 정량적/정성적 효과입니다.
+        </p>
+
+        <!-- 정량적 효과 -->
+        <div class="grid-4" style="margin-bottom: 32px;">
+            <div class="glass-card stat-box" style="border-color: rgba(52,211,153,0.2);">
+                <div class="stat-value val-green">90%</div>
+                <div class="stat-label">일보 작성 시간 절감</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">60분 &rarr; 5분 이내</p>
+            </div>
+            <div class="glass-card stat-box" style="border-color: rgba(96,165,250,0.2);">
+                <div class="stat-value val-blue">100%</div>
+                <div class="stat-label">포맷 표준화율</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">작성자 무관 일관 품질</p>
+            </div>
+            <div class="glass-card stat-box" style="border-color: rgba(167,139,250,0.2);">
+                <div class="stat-value val-purple">&lt;10s</div>
+                <div class="stat-label">핵심이슈 파악 시간</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">수동 분석 30분 &rarr; AI 즉시</p>
+            </div>
+            <div class="glass-card stat-box" style="border-color: rgba(251,191,36,0.2);">
+                <div class="stat-value val-yellow">0건</div>
+                <div class="stat-label">수동 계산 오류</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">전일비교 자동 계산</p>
+            </div>
+        </div>
+
+        <!-- 정성적 효과 -->
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>&#128188; 경영 관점</h3>
+                <ul style="list-style:none; font-size:0.9rem; color:var(--text-secondary);">
+                    <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text-primary);">의사결정 속도 향상</strong> &mdash; 임원용 15초 브리핑으로 핵심 지표 즉시 파악
+                    </li>
+                    <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text-primary);">트렌드 가시성 확보</strong> &mdash; 월/주/일 자동 비교로 악화 추세 조기 감지
+                    </li>
+                    <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text-primary);">보고 체계 표준화</strong> &mdash; 교대조/작성자 무관 동일 품질 보장
+                    </li>
+                    <li style="padding:8px 0;">
+                        <strong style="color:var(--text-primary);">AI 활용 선도 사례</strong> &mdash; 사내 AI 도입 확산의 레퍼런스 프로젝트
+                    </li>
+                </ul>
+            </div>
+            <div class="glass-card">
+                <h3>&#128736; 현장 관점</h3>
+                <ul style="list-style:none; font-size:0.9rem; color:var(--text-secondary);">
+                    <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text-primary);">단순 업무 해방</strong> &mdash; 반복적 일보 작성에서 벗어나 분석/개선에 집중
+                    </li>
+                    <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text-primary);">실무 맞춤 인사이트</strong> &mdash; 즉시 조치 Top 3, TAT 병목 구간 바로 확인
+                    </li>
+                    <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text-primary);">대화형 질의</strong> &mdash; "Worst 10 중 즉시 조치가 필요한 건?" 바로 질문
+                    </li>
+                    <li style="padding:8px 0;">
+                        <strong style="color:var(--text-primary);">인수인계 용이</strong> &mdash; AI가 이슈 이력을 기억, 신규 투입 인원 온보딩 지원
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Challenges & Risks -->
+<section id="risks">
+    <div class="container">
+        <div class="section-label">Challenges & Risks</div>
+        <h2 class="section-title">도전 과제 및 리스크</h2>
+        <p class="section-desc">
+            프로덕션 전환 과정에서 예상되는 주요 도전 과제와 대응 방안입니다.
+        </p>
+
+        <div class="grid-2">
+            <div class="glass-card" style="border-left: 3px solid var(--accent-red);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(248,113,113,0.2); color:var(--accent-red);">HIGH RISK</span>
+                </div>
+                <h3>실데이터 연동 복잡도</h3>
+                <p style="margin-bottom:12px;">MES/WMS 시스템별로 데이터 포맷, 접근 방식, 권한 체계가 상이. 데이터 정합성 검증이 핵심.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">데이터 어댑터 패턴으로 소스별 추상화. 단계적 연동 (1개 FAB &rarr; 전체 확장).</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-red);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(248,113,113,0.2); color:var(--accent-red);">HIGH RISK</span>
+                </div>
+                <h3>AI 분석 품질 일관성</h3>
+                <p style="margin-bottom:12px;">LLM 특성상 동일 데이터에 대해 다른 분석 결과를 생성할 수 있음. 핵심 수치 인용 정확도 관리 필요.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">프롬프트 엔지니어링 지속 개선. 사전 계산된 비교 데이터를 컨텍스트에 주입. 결과 검증 레이어 추가.</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-yellow);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(251,191,36,0.2); color:var(--accent-yellow);">MED RISK</span>
+                </div>
+                <h3>사내망 환경 제약</h3>
+                <p style="margin-bottom:12px;">SSL 인증서, 프록시, 방화벽 등 사내망 환경에서 외부 API (Gemini) 호출 안정성.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">SSL SECLEVEL=0 우회 적용 완료. 재시도 로직 + 타임아웃 설정. 향후 온프레미스 모델 검토.</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-yellow);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(251,191,36,0.2); color:var(--accent-yellow);">MED RISK</span>
+                </div>
+                <h3>사용자 수용성</h3>
+                <p style="margin-bottom:12px;">현장 작업자의 기존 업무 방식 변경 저항. AI 분석 결과에 대한 신뢰도 확보 시간 필요.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">기존 일보와 병행 운영. 현장 피드백 반영 주기적 개선. 사용법 교육 및 챔피언 사용자 육성.</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(96,165,250,0.2); color:var(--accent-blue);">LOW RISK</span>
+                </div>
+                <h3>API 비용 관리</h3>
+                <p style="margin-bottom:12px;">Gemini API 호출량 증가에 따른 비용. 특히 OCR + 분석 + 요약 + 챗봇 4단계 호출.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">Gemini 2.0 Flash는 저비용 모델. 결과 캐싱으로 중복 호출 방지. 일일 사용량 모니터링.</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(96,165,250,0.2); color:var(--accent-blue);">LOW RISK</span>
+                </div>
+                <h3>데이터 보안</h3>
+                <p style="margin-bottom:12px;">일보 데이터에 생산량, 설비 상태 등 민감 정보 포함. 외부 API로 전송 시 보안 이슈.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">데이터 마스킹/익명화 처리. 보안팀 검토 후 승인. 장기적으로 온프레미스 LLM 전환 검토.</span>
+                </div>
             </div>
         </div>
     </div>

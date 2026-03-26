@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Report Agent - 물류 수작업일보 AI Agent</title>
+    <title>일보 AI 분석 Agent - Daily Report AI Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #070b14;
-            --bg-secondary: #0f172a;
             --glass-bg: rgba(255,255,255,0.05);
             --glass-border: rgba(255,255,255,0.1);
             --text-primary: rgba(255,255,255,0.92);
@@ -21,9 +20,7 @@
             --accent-yellow: #fbbf24;
             --accent-red: #f87171;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Inter', 'Malgun Gothic', sans-serif;
             background: var(--bg-primary);
@@ -31,7 +28,6 @@
             line-height: 1.7;
             overflow-x: hidden;
         }
-
         body::before {
             content: '';
             position: fixed;
@@ -44,601 +40,181 @@
             z-index: -1;
             pointer-events: none;
         }
-
         @keyframes meshFloat {
             0%, 100% { transform: translate(0, 0) scale(1); }
             25% { transform: translate(3%, -2%) scale(1.02); }
             50% { transform: translate(-2%, 3%) scale(0.98); }
             75% { transform: translate(1%, -1%) scale(1.01); }
         }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* ── Navigation ── */
+        /* Navigation */
         nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 100;
+            position: fixed; top: 0; width: 100%; z-index: 100;
             background: rgba(7,11,20,0.85);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-
-        nav .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
-
+        nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
         .nav-logo {
-            font-weight: 800;
-            font-size: 1.1rem;
+            font-weight: 800; font-size: 1.1rem;
             background: linear-gradient(135deg, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
-        .nav-links {
-            display: flex;
-            gap: 28px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
+        .nav-links { display: flex; gap: 24px; list-style: none; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: color 0.3s; }
         .nav-links a:hover { color: var(--accent-blue); }
-
         .nav-github {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 10px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; font-weight: 600; transition: all 0.3s;
         }
+        .nav-github:hover { background: rgba(255,255,255,0.1); color: white; }
 
-        .nav-github:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        /* ── Hero ── */
-        .hero {
-            padding: 140px 0 80px;
-            text-align: center;
-        }
-
+        /* Hero */
+        .hero { padding: 140px 0 80px; text-align: center; }
         .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 20px;
-            border-radius: 100px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            border: 1px solid rgba(52,211,153,0.3);
-            background: rgba(52,211,153,0.08);
-            color: var(--accent-green);
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 20px; border-radius: 100px;
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em;
+            border: 1px solid rgba(52,211,153,0.3); background: rgba(52,211,153,0.08); color: var(--accent-green);
             margin-bottom: 28px;
         }
-
-        .hero-badge .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
+        .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 900;
-            letter-spacing: -0.03em;
+            font-size: 3.5rem; font-weight: 900; letter-spacing: -0.03em;
             background: linear-gradient(135deg, #ffffff 0%, #60a5fa 45%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-            line-height: 1.15;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 12px; line-height: 1.15;
         }
-
-        .hero-sub {
-            font-size: 0.9rem;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 28px;
-        }
-
-        .hero p {
-            font-size: 1.15rem;
-            color: var(--text-secondary);
-            max-width: 680px;
-            margin: 0 auto 40px;
-            line-height: 1.8;
-        }
-
-        .hero-tags {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 48px;
-        }
-
-        .tag {
-            padding: 6px 16px;
-            border-radius: 100px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            border: 1px solid;
-        }
-
+        .hero-sub { font-size: 0.9rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 28px; }
+        .hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 40px; line-height: 1.8; }
+        .hero-tags { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+        .tag { padding: 6px 16px; border-radius: 100px; font-size: 0.78rem; font-weight: 600; border: 1px solid; }
         .tag-blue { border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); color: var(--accent-blue); }
         .tag-purple { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); color: var(--accent-purple); }
         .tag-green { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.08); color: var(--accent-green); }
         .tag-yellow { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); color: var(--accent-yellow); }
 
-        /* ── Section ── */
-        section {
-            padding: 80px 0;
-        }
+        /* Section */
+        section { padding: 80px 0; }
+        .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-blue); margin-bottom: 12px; }
+        .section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.2; }
+        .section-desc { font-size: 1rem; color: var(--text-secondary); max-width: 620px; margin-bottom: 48px; line-height: 1.8; }
 
-        .section-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--accent-blue);
-            margin-bottom: 12px;
-        }
-
-        .section-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 16px;
-            line-height: 1.2;
-        }
-
-        .section-desc {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin-bottom: 48px;
-            line-height: 1.8;
-        }
-
-        /* ── Glass Card ── */
+        /* Glass Card */
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 32px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
+            background: var(--glass-bg); backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 32px; position: relative; overflow: hidden; transition: all 0.4s ease;
         }
-
         .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
         }
-
-        .glass-card:hover {
-            border-color: rgba(255,255,255,0.18);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 48px rgba(0,0,0,0.3);
-        }
-
-        .glass-card h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .glass-card p {
-            color: var(--text-secondary);
-            font-size: 0.92rem;
-            line-height: 1.7;
-        }
-
-        .card-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            margin-bottom: 16px;
-        }
-
+        .glass-card:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-3px); box-shadow: 0 12px 48px rgba(0,0,0,0.3); }
+        .glass-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .glass-card p { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.7; }
+        .card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 16px; }
         .icon-blue { background: rgba(96,165,250,0.15); color: var(--accent-blue); }
         .icon-purple { background: rgba(167,139,250,0.15); color: var(--accent-purple); }
         .icon-green { background: rgba(52,211,153,0.15); color: var(--accent-green); }
         .icon-yellow { background: rgba(251,191,36,0.15); color: var(--accent-yellow); }
         .icon-red { background: rgba(248,113,113,0.15); color: var(--accent-red); }
 
-        /* ── Grid Layouts ── */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
-
+        /* Grids */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
             .hero h1 { font-size: 2.2rem; }
             .section-title { font-size: 1.6rem; }
+            .nav-links { display: none; }
         }
 
-        /* ── Architecture Diagram ── */
-        .arch-diagram {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 40px;
-            margin: 40px 0;
-        }
-
-        .arch-flow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .arch-node {
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-align: center;
-            min-width: 130px;
-        }
-
-        .arch-arrow {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-        }
-
+        /* Architecture */
+        .arch-diagram { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px; margin: 40px 0; }
+        .arch-flow { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .arch-node { padding: 14px 24px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; text-align: center; min-width: 140px; }
+        .arch-arrow { color: var(--text-muted); font-size: 1.4rem; }
         .node-input { background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: var(--accent-blue); }
         .node-process { background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--accent-purple); }
         .node-ai { background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); color: var(--accent-green); }
         .node-output { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: var(--accent-yellow); }
+        @media (max-width: 768px) { .arch-flow { flex-direction: column; } .arch-arrow { transform: rotate(90deg); } }
 
-        /* ── Timeline / Roadmap ── */
-        .timeline {
-            position: relative;
-            padding-left: 40px;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple), var(--accent-green), rgba(255,255,255,0.1));
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 40px;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -33px;
-            top: 6px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid;
-        }
-
+        /* Timeline */
+        .timeline { position: relative; padding-left: 40px; }
+        .timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--accent-green), var(--accent-blue), rgba(255,255,255,0.1)); }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-dot { position: absolute; left: -33px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid; }
         .dot-done { border-color: var(--accent-green); background: var(--accent-green); }
         .dot-current { border-color: var(--accent-blue); background: var(--accent-blue); box-shadow: 0 0 12px rgba(96,165,250,0.5); }
         .dot-planned { border-color: var(--text-muted); background: transparent; }
-
-        .timeline-phase {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
+        .timeline-phase { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
         .phase-done { color: var(--accent-green); }
         .phase-current { color: var(--accent-blue); }
         .phase-planned { color: var(--text-muted); }
+        .timeline-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+        .timeline-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
+        .timeline-tasks { margin-top: 12px; list-style: none; }
+        .timeline-tasks li { position: relative; padding-left: 24px; margin-bottom: 6px; font-size: 0.88rem; color: var(--text-secondary); }
+        .timeline-tasks li::before { content: ''; position: absolute; left: 0; top: 8px; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid; }
+        .task-done::before { border-color: var(--accent-green); background: var(--accent-green); }
+        .task-done::after { content: ''; position: absolute; left: 3px; top: 11px; width: 8px; height: 4px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg); }
+        .task-todo::before { border-color: var(--text-muted); background: transparent; }
 
-        .timeline-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .timeline-desc {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.7;
-        }
-
-        .timeline-tasks {
-            margin-top: 12px;
-            list-style: none;
-        }
-
-        .timeline-tasks li {
-            position: relative;
-            padding-left: 24px;
-            margin-bottom: 6px;
-            font-size: 0.88rem;
-            color: var(--text-secondary);
-        }
-
-        .timeline-tasks li::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 8px;
-            width: 14px;
-            height: 14px;
-            border-radius: 4px;
-            border: 1.5px solid;
-        }
-
-        .task-done::before {
-            border-color: var(--accent-green);
-            background: var(--accent-green);
-        }
-
-        .task-done::after {
-            content: '';
-            position: absolute;
-            left: 3px;
-            top: 11px;
-            width: 8px;
-            height: 4px;
-            border-left: 2px solid white;
-            border-bottom: 2px solid white;
-            transform: rotate(-45deg);
-        }
-
-        .task-todo::before {
-            border-color: var(--text-muted);
-            background: transparent;
-        }
-
-        /* ── Process Flow ── */
-        .process-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-
-        .process-step {
-            text-align: center;
-            padding: 28px 20px;
-        }
-
-        .step-number {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.85rem;
-            margin-bottom: 14px;
-        }
-
+        /* Process Step */
+        .process-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .process-step { text-align: center; padding: 28px 20px; }
+        .step-number { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; margin-bottom: 14px; }
         .step-num-blue { background: rgba(96,165,250,0.2); color: var(--accent-blue); }
         .step-num-purple { background: rgba(167,139,250,0.2); color: var(--accent-purple); }
         .step-num-green { background: rgba(52,211,153,0.2); color: var(--accent-green); }
         .step-num-yellow { background: rgba(251,191,36,0.2); color: var(--accent-yellow); }
+        .process-step h4 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+        .process-step p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
-        .process-step h4 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .process-step p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* ── Tech Stack ── */
-        .tech-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .tech-item:hover {
-            border-color: rgba(255,255,255,0.18);
-            background: rgba(255,255,255,0.08);
-        }
-
-        .tech-name { font-weight: 600; font-size: 0.9rem; }
-        .tech-desc { font-size: 0.78rem; color: var(--text-muted); }
-
-        /* ── Code Block ── */
-        .code-block {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 24px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            line-height: 1.8;
-            overflow-x: auto;
-            color: var(--text-secondary);
-        }
-
-        .code-block .comment { color: rgba(255,255,255,0.3); }
-        .code-block .cmd { color: var(--accent-green); }
-        .code-block .flag { color: var(--accent-yellow); }
-
-        /* ── Stat Row ── */
-        .stat-box {
-            text-align: center;
-            padding: 28px 16px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            font-family: 'JetBrains Mono', monospace;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
+        /* Stat */
+        .stat-box { text-align: center; padding: 28px 16px; }
+        .stat-value { font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1; margin-bottom: 8px; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
         .val-blue { color: var(--accent-blue); }
         .val-purple { color: var(--accent-purple); }
         .val-green { color: var(--accent-green); }
         .val-yellow { color: var(--accent-yellow); }
 
-        /* ── Table ── */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-        }
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        .data-table th { text-align: left; padding: 12px 16px; background: rgba(255,255,255,0.04); color: var(--text-muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .data-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary); }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
 
-        .data-table th {
-            text-align: left;
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.04);
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
+        /* Code Block */
+        .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.8; overflow-x: auto; color: var(--text-secondary); }
+        .code-block .comment { color: rgba(255,255,255,0.3); }
+        .code-block .cmd { color: var(--accent-green); }
+        .code-block .flag { color: var(--accent-yellow); }
 
-        .data-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            color: var(--text-secondary);
-        }
+        /* Tech Item */
+        .tech-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; transition: all 0.3s; }
+        .tech-item:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); }
+        .tech-name { font-weight: 600; font-size: 0.9rem; }
+        .tech-desc { font-size: 0.78rem; color: var(--text-muted); }
 
-        .data-table tr:hover td {
-            background: rgba(255,255,255,0.02);
-        }
+        /* Badge */
+        .badge-inline { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; vertical-align: middle; }
 
-        /* ── Footer ── */
-        footer {
-            padding: 60px 0 40px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            text-align: center;
-        }
+        /* Divider */
+        .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); margin: 60px 0; }
 
-        footer p {
-            color: var(--text-muted);
-            font-size: 0.82rem;
-        }
-
-        footer a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
-
-        /* ── Misc ── */
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-            margin: 60px 0;
-        }
-
-        .highlight {
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-
-        .badge-inline {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            vertical-align: middle;
-        }
-
-        .badge-done { background: rgba(52,211,153,0.15); color: var(--accent-green); }
-        .badge-wip { background: rgba(96,165,250,0.15); color: var(--accent-blue); }
-        .badge-planned { background: rgba(255,255,255,0.08); color: var(--text-muted); }
-
-        .mobile-menu { display: none; }
-
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .mobile-menu { display: block; }
-            .hero { padding: 120px 0 60px; }
-            .arch-flow { flex-direction: column; }
-            .arch-arrow { transform: rotate(90deg); }
-        }
+        /* Footer */
+        footer { padding: 60px 0 40px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; }
+        footer p { color: var(--text-muted); font-size: 0.82rem; }
+        footer a { color: var(--accent-blue); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -646,12 +222,11 @@
 <!-- Navigation -->
 <nav>
     <div class="container">
-        <span class="nav-logo">Daily Report Agent</span>
+        <span class="nav-logo">Daily Report AI Agent</span>
         <ul class="nav-links">
             <li><a href="#background">Background</a></li>
-            <li><a href="#overview">Overview</a></li>
-            <li><a href="#architecture">Architecture</a></li>
-            <li><a href="#screenshots">Demo</a></li>
+            <li><a href="#pipeline">AI Pipeline</a></li>
+            <li><a href="#demo">Demo</a></li>
             <li><a href="#progress">Progress</a></li>
             <li><a href="#roadmap">Roadmap</a></li>
             <li><a href="#impact">Impact</a></li>
@@ -664,45 +239,47 @@
     </div>
 </nav>
 
-<!-- Hero -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ══════════════════════════════════════════════════ -->
 <section class="hero">
     <div class="container">
         <div class="hero-badge">
             <span class="dot"></span>
             PoC Project
         </div>
-        <h1>Daily Report Agent</h1>
-        <p class="hero-sub">Logistics Manual Handling Daily Report AI Agent</p>
+        <h1>일보 AI 분석 Agent</h1>
+        <p class="hero-sub">Daily Report AI Analyzer &amp; Insight Engine</p>
         <p>
-            반도체 물류 현장의 수작업 데이터를 자동 수집하여
-            <strong>AI 기반 일보를 생성</strong>하고,
-            <strong>Gemini Vision OCR</strong>로 기존 일보를 분석하며,
-            <strong>역할별 맞춤 요약</strong>과 <strong>대화형 Q&A</strong>를 제공하는
-            올인원 AI 에이전트입니다.
+            매일 발행되는 물류 수작업 일보를 AI가 자동으로 읽고,
+            <strong>핵심 이슈 3가지를 추출</strong>하고,
+            <strong>임원/실무자별 맞춤 요약</strong>을 생성하며,
+            <strong>대화형 Q&A</strong>로 일보에 대해 자유롭게 질문할 수 있는
+            AI 분석 에이전트입니다.
         </p>
         <div class="hero-tags">
-            <span class="tag tag-blue">NiceGUI</span>
-            <span class="tag tag-purple">Gemini 2.0 Flash</span>
-            <span class="tag tag-green">Python 3.11</span>
-            <span class="tag tag-yellow">Matplotlib</span>
+            <span class="tag tag-green">Gemini 2.0 Flash Vision</span>
+            <span class="tag tag-blue">OCR &rarr; 구조화 JSON</span>
+            <span class="tag tag-purple">역할별 맞춤 요약</span>
+            <span class="tag tag-yellow">대화형 챗봇</span>
         </div>
 
         <div class="grid-4" style="max-width: 800px; margin: 0 auto;">
             <div class="glass-card stat-box">
-                <div class="stat-value val-blue">7+</div>
-                <div class="stat-label">Source Files</div>
+                <div class="stat-value val-green">4</div>
+                <div class="stat-label">AI 분석 단계</div>
             </div>
             <div class="glass-card stat-box">
                 <div class="stat-value val-purple">5</div>
-                <div class="stat-label">AI Prompts</div>
+                <div class="stat-label">전문 프롬프트</div>
             </div>
             <div class="glass-card stat-box">
-                <div class="stat-value val-green">2</div>
-                <div class="stat-label">Web Pages</div>
+                <div class="stat-value val-blue">2</div>
+                <div class="stat-label">역할별 요약</div>
             </div>
             <div class="glass-card stat-box">
-                <div class="stat-value val-yellow">13</div>
-                <div class="stat-label">Chart Types</div>
+                <div class="stat-value val-yellow">&infin;</div>
+                <div class="stat-label">대화형 Q&A</div>
             </div>
         </div>
     </div>
@@ -710,14 +287,17 @@
 
 <div class="divider"></div>
 
-<!-- Background: 개발 배경 -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- BACKGROUND: 개발 배경 -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="background">
     <div class="container">
         <div class="section-label">Background</div>
         <h2 class="section-title">개발 배경 및 목적</h2>
         <p class="section-desc">
-            반도체 FAB 물류 현장에서 발생하는 수작업 일보의 작성/분석 과정에서
-            반복적인 비효율과 정보 전달 지연 문제를 해결하기 위해 시작되었습니다.
+            반도체 FAB 물류 현장에서는 매일 수작업 일보가 발행됩니다.
+            하지만 일보를 <strong>읽고 핵심을 파악하는 데</strong> 많은 시간이 소요되고,
+            사람마다 해석이 달라 정보 전달에 왜곡이 발생합니다.
         </p>
 
         <div class="grid-2" style="margin-bottom: 48px;">
@@ -729,20 +309,20 @@
                 </div>
                 <ul style="list-style:none;">
                     <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
-                        <strong style="color:var(--accent-red);">수동 일보 작성</strong><br>
-                        교대조별로 Excel/수기로 일보를 작성. 평균 <strong>30~60분/일</strong> 소요
+                        <strong style="color:var(--accent-red);">일보 해석에 시간 과다 소요</strong><br>
+                        차트 13종 + 테이블 + KPI를 사람이 읽고 핵심을 파악하는 데 <strong>30분 이상</strong> 소요
                     </li>
                     <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
-                        <strong style="color:var(--accent-red);">데이터 불일치</strong><br>
-                        작성자마다 포맷/기준이 달라 시계열 비교 어려움. 전일비교 수동 계산 오류 빈발
+                        <strong style="color:var(--accent-red);">보고 대상별 재가공 필요</strong><br>
+                        동일 일보를 임원/실무자/교대조에게 각각 다른 포맷으로 요약해서 전달해야 함
                     </li>
                     <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
-                        <strong style="color:var(--accent-red);">분석 지연</strong><br>
-                        핵심 이슈 파악에 추가 시간 필요. 임원/실무자별 맞춤 리포트 별도 작성
+                        <strong style="color:var(--accent-red);">핵심 이슈 누락 위험</strong><br>
+                        데이터가 많아 전일 대비 악화 지표, 이상 패턴을 놓치는 경우 빈발
                     </li>
                     <li style="padding:10px 0; color:var(--text-secondary);">
-                        <strong style="color:var(--accent-red);">이력 관리 부재</strong><br>
-                        과거 일보 검색/비교 어려움. 트렌드 분석이 사실상 불가능
+                        <strong style="color:var(--accent-red);">추가 질의 불가</strong><br>
+                        일보에 대한 추가 궁금증이 있어도 데이터를 다시 꺼내서 확인해야 함
                     </li>
                 </ul>
             </div>
@@ -751,24 +331,24 @@
             <div class="glass-card" style="border-color: rgba(52,211,153,0.25);">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
                     <span style="font-size:1.5rem;">&#128994;</span>
-                    <h3 style="margin:0;">To-Be (목표 상태)</h3>
+                    <h3 style="margin:0;">To-Be (AI Agent 도입 후)</h3>
                 </div>
                 <ul style="list-style:none;">
                     <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
-                        <strong style="color:var(--accent-green);">자동 일보 생성</strong><br>
-                        데이터 수집부터 차트 렌더링까지 <strong>1분 이내</strong> 자동 완료
+                        <strong style="color:var(--accent-green);">일보 업로드 즉시 핵심 파악</strong><br>
+                        AI가 일보 이미지를 OCR로 읽고 <strong>10초 이내</strong> 핵심이슈 3가지 자동 추출
                     </li>
                     <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
-                        <strong style="color:var(--accent-green);">표준화된 포맷</strong><br>
-                        13종 차트 + KPI + Worst 10으로 일관된 일보 품질 보장
+                        <strong style="color:var(--accent-green);">역할별 맞춤 요약 자동 생성</strong><br>
+                        임원용(15초 브리핑) / 실무자용(즉시 조치 Top 3) 동시 생성
                     </li>
                     <li style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">
-                        <strong style="color:var(--accent-green);">AI 즉시 분석</strong><br>
-                        핵심이슈 3가지 자동 추출. 역할별 맞춤 요약. 대화형 Q&A
+                        <strong style="color:var(--accent-green);">전일비교 자동 분석</strong><br>
+                        모든 지표의 전일 대비 변화를 자동 계산, 악화 지표 즉시 알림
                     </li>
                     <li style="padding:10px 0; color:var(--text-secondary);">
-                        <strong style="color:var(--accent-green);">트렌드 가시화</strong><br>
-                        월/주/일별 트렌드 자동 비교. 전일대비 악화 지표 즉시 알림
+                        <strong style="color:var(--accent-green);">대화형 Q&A</strong><br>
+                        "Worst 10 중 즉시 조치 필요한 건?" 같은 질문에 AI가 즉시 답변
                     </li>
                 </ul>
             </div>
@@ -778,19 +358,19 @@
         <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">핵심 개발 방향</h3>
         <div class="grid-3">
             <div class="glass-card" style="text-align:center; padding:28px 20px;">
-                <div style="font-size:2rem; margin-bottom:12px;">&#9889;</div>
-                <h3 style="justify-content:center;">속도 우선</h3>
-                <p>PoC 빠른 검증을 위해 NiceGUI + Matplotlib 조합으로 최소 코드, 최대 기능 구현. 별도 프론트엔드 없이 Python Only.</p>
+                <div style="font-size:2rem; margin-bottom:12px;">&#128065;</div>
+                <h3 style="justify-content:center;">읽는 AI</h3>
+                <p>기존 일보 이미지를 Gemini Vision OCR로 읽어서 구조화된 데이터로 변환. 사람이 다시 입력할 필요 없음.</p>
             </div>
             <div class="glass-card" style="text-align:center; padding:28px 20px;">
                 <div style="font-size:2rem; margin-bottom:12px;">&#129504;</div>
-                <h3 style="justify-content:center;">AI 네이티브</h3>
-                <p>단순 자동화가 아닌 AI가 데이터를 이해하고 인사이트를 제공하는 구조. OCR, 분석, 요약, 챗봇 4단계 파이프라인.</p>
+                <h3 style="justify-content:center;">분석하는 AI</h3>
+                <p>단순 요약이 아닌, 전일비교/악화지표/병목구간까지 분석. 역할별 맞춤 인사이트 제공.</p>
             </div>
             <div class="glass-card" style="text-align:center; padding:28px 20px;">
-                <div style="font-size:2rem; margin-bottom:12px;">&#128260;</div>
-                <h3 style="justify-content:center;">확장 가능</h3>
-                <p>데이터 소스만 교체하면 실서비스 전환 가능한 구조. 프롬프트 템플릿 분리로 도메인 커스터마이징 용이.</p>
+                <div style="font-size:2rem; margin-bottom:12px;">&#128172;</div>
+                <h3 style="justify-content:center;">대화하는 AI</h3>
+                <p>일보 데이터 기반 자유 질의응답. 추가 궁금증을 바로 해결. 대화 히스토리 유지.</p>
             </div>
         </div>
     </div>
@@ -798,52 +378,275 @@
 
 <div class="divider"></div>
 
-<!-- Overview -->
-<section id="overview">
+<!-- ══════════════════════════════════════════════════ -->
+<!-- AI PIPELINE: 핵심 기능 -->
+<!-- ══════════════════════════════════════════════════ -->
+<section id="pipeline">
     <div class="container">
-        <div class="section-label">Overview</div>
-        <h2 class="section-title">프로젝트 개요</h2>
+        <div class="section-label">AI Analysis Pipeline</div>
+        <h2 class="section-title">AI 분석 파이프라인</h2>
         <p class="section-desc">
-            반도체 FAB 물류 현장에서 발생하는 수작업(수동 반송, 우선순위 변경, 기준정보 변경 등)을
-            체계적으로 관리하고, AI가 핵심 이슈를 자동 분석하는 시스템입니다.
+            일보 이미지 한 장을 업로드하면, 4단계 AI 파이프라인이
+            자동으로 핵심 인사이트를 추출합니다.
         </p>
 
-        <div class="grid-2" style="margin-bottom: 40px;">
-            <div class="glass-card">
-                <div class="card-icon icon-blue">&#128196;</div>
-                <h3>일보 자동 생성</h3>
-                <p>
-                    날짜 범위를 지정하면 수작업 현황, 반송 트렌드, TAT, Worst 10, KPI 등을
-                    포함한 고품질 PNG 일보 이미지를 자동 생성합니다.
-                    월/주/일별 트렌드 차트 13종이 포함됩니다.
-                </p>
-            </div>
-            <div class="glass-card">
-                <div class="card-icon icon-purple">&#129504;</div>
-                <h3>AI 분석 Agent</h3>
-                <p>
-                    Gemini 2.0 Flash Vision으로 일보 이미지를 OCR하고,
-                    핵심 이슈 3가지를 자동 추출합니다.
-                    임원용/실무자용 맞춤 요약과 대화형 Q&A 챗봇을 제공합니다.
-                </p>
+        <!-- 4-Step Flow -->
+        <div class="arch-diagram">
+            <div class="arch-flow">
+                <div class="arch-node node-input">
+                    &#128196; 기존 일보<br><small>PNG/JPG 업로드</small>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-node node-ai">
+                    &#128065; Gemini Vision<br><small>OCR &rarr; JSON 구조화</small>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-node node-process">
+                    &#129504; AI 분석<br><small>이슈 추출 + 요약</small>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-node node-output">
+                    &#128172; 인사이트<br><small>요약 + 챗봇 Q&A</small>
+                </div>
             </div>
         </div>
 
-        <div class="grid-3">
-            <div class="glass-card">
-                <div class="card-icon icon-green">&#128202;</div>
-                <h3>13종 트렌드 차트</h3>
-                <p>수작업 현황, 수동반송율, 우선순위 변경, LOT 우선순위, 기준정보 변경, TAT, 카세트 반송 등 월/주/일별 트렌드</p>
+        <!-- 4 Steps Detail -->
+        <div class="grid-2" style="margin-bottom: 24px;">
+            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <div class="step-number step-num-blue">1</div>
+                    <h3 style="margin:0;">OCR 구조화</h3>
+                </div>
+                <p style="margin-bottom:12px;">
+                    Gemini 2.0 Flash <strong>Vision</strong>이 일보 이미지를 읽어
+                    차트/테이블/KPI 등 모든 데이터를 <strong>구조화된 JSON</strong>으로 변환합니다.
+                </p>
+                <div style="padding:12px; background:rgba(96,165,250,0.06); border-radius:10px; font-size:0.85rem;">
+                    <strong style="color:var(--accent-blue);">추출 대상:</strong>
+                    <span style="color:var(--text-secondary);">보고일/근무조/작성자, 핵심 KPI, 트렌드 수치 (차트 바 높이 추정), Worst 10 테이블, 주요 이슈 텍스트</span>
+                </div>
             </div>
-            <div class="glass-card">
-                <div class="card-icon icon-yellow">&#128172;</div>
-                <h3>대화형 Q&A</h3>
-                <p>일보 데이터를 컨텍스트로 자유로운 질문 가능. 추천 질문 버튼으로 빠른 인사이트 도출</p>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-purple);">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <div class="step-number step-num-purple">2</div>
+                    <h3 style="margin:0;">핵심이슈 자동 추출</h3>
+                </div>
+                <p style="margin-bottom:12px;">
+                    전일비교 데이터를 기반으로 <strong>핵심 이슈 3가지</strong>를 추출합니다.
+                    긴급도별 색상 코딩으로 한눈에 파악 가능합니다.
+                </p>
+                <div style="padding:12px; background:rgba(167,139,250,0.06); border-radius:10px; font-size:0.85rem;">
+                    <span style="color:var(--accent-red);">&#128308; 긴급</span> &nbsp;
+                    <span style="color:var(--accent-yellow);">&#128992; 주의</span> &nbsp;
+                    <span style="color:var(--accent-green);">&#128994; 양호</span>
+                    <br><span style="color:var(--text-secondary);">각 이슈에 수치 근거 + 추천 조치 포함</span>
+                </div>
             </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-green);">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <div class="step-number step-num-green">3</div>
+                    <h3 style="margin:0;">역할별 맞춤 요약</h3>
+                </div>
+                <p style="margin-bottom:12px;">
+                    동일 일보를 <strong>두 가지 관점</strong>으로 동시에 요약합니다.
+                    각 역할에 필요한 정보만 선별하여 최적화된 보고를 생성합니다.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:180px; padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; font-size:0.85rem;">
+                        <strong style="color:var(--accent-blue);">&#128188; 임원용</strong><br>
+                        <span style="color:var(--text-secondary);">15초 핵심 브리핑, 월간 달성률, 악화 알림, 의사결정 포인트</span>
+                    </div>
+                    <div style="flex:1; min-width:180px; padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; font-size:0.85rem;">
+                        <strong style="color:var(--accent-yellow);">&#128736; 실무자용</strong><br>
+                        <span style="color:var(--text-secondary);">즉시 조치 Top 3, TAT 병목 구간, 수동반송 현황, 부서-공정 지정</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-yellow);">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <div class="step-number step-num-yellow">4</div>
+                    <h3 style="margin:0;">대화형 Q&A 챗봇</h3>
+                </div>
+                <p style="margin-bottom:12px;">
+                    일보 데이터를 컨텍스트로 <strong>자유 질문</strong>이 가능합니다.
+                    대화 히스토리가 유지되어 연속적인 분석이 가능합니다.
+                </p>
+                <div style="padding:12px; background:rgba(251,191,36,0.06); border-radius:10px; font-size:0.85rem; color:var(--text-secondary);">
+                    <strong style="color:var(--accent-yellow);">추천 질문 예시:</strong><br>
+                    "오늘 가장 큰 이슈가 뭐야?" &bull;
+                    "TAT 병목 구간은 어디야?" &bull;
+                    "Worst 10 중 즉시 조치가 필요한 건?" &bull;
+                    "수동반송율 추이는 어때?"
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Prompt Design -->
+        <div class="glass-card">
+            <h3>&#128221; 프롬프트 설계 (5종)</h3>
+            <p style="margin-bottom:16px;">
+                각 분석 단계에 최적화된 전문 프롬프트를 별도 파일로 관리합니다.
+                도메인 지식(반도체 물류)을 프롬프트에 내장하여 분석 품질을 보장합니다.
+            </p>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>프롬프트</th>
+                        <th>역할</th>
+                        <th>핵심 지시사항</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ocr_extract.txt</strong></td>
+                        <td>OCR 구조화</td>
+                        <td>이미지의 모든 데이터를 JSON으로 변환. 차트 값은 바 높이/파이 비율로 추정</td>
+                    </tr>
+                    <tr>
+                        <td><strong>key_issues.txt</strong></td>
+                        <td>핵심이슈 추출</td>
+                        <td>정확히 3가지 이슈 추출. 수치 근거 필수. 긴급도별 색상 코딩</td>
+                    </tr>
+                    <tr>
+                        <td><strong>executive.txt</strong></td>
+                        <td>임원용 요약</td>
+                        <td>15초 핵심 브리핑. 표 형식. 월간 달성률. 악화 지표 알림</td>
+                    </tr>
+                    <tr>
+                        <td><strong>operator.txt</strong></td>
+                        <td>실무자용 요약</td>
+                        <td>즉시 조치 Top 3. TAT 병목. 부서-공정 지정. 최대 2줄</td>
+                    </tr>
+                    <tr>
+                        <td><strong>chat_system.txt</strong></td>
+                        <td>챗봇 시스템</td>
+                        <td>데이터 기반 답변 only. 추측 금지. 한국어 응답. 실무적 조언</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- DEMO: 입력 & 분석 흐름 -->
+<!-- ══════════════════════════════════════════════════ -->
+<section id="demo">
+    <div class="container">
+        <div class="section-label">Demo</div>
+        <h2 class="section-title">동작 흐름 시연</h2>
+        <p class="section-desc">
+            실제로 발행된 일보 이미지가 AI를 거쳐 어떻게 분석되는지 보여줍니다.
+        </p>
+
+        <!-- 입력: 기존 일보 -->
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <h3>&#128196; Step 0. 입력 &mdash; 기존 발행 일보</h3>
+            <p style="margin-bottom:20px;">
+                현장에서 매일 발행되는 물류 수작업 일보입니다. 이 이미지를 시스템에 업로드하면 AI 분석이 시작됩니다.
+            </p>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                <div style="flex:1; min-width:280px; max-width:400px;">
+                    <div style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center;">
+                        <img src="images/report_sample.png" alt="일보 샘플 1" style="width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+                        <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">발행 일보 예시 (2026-03-20)</p>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:280px; max-width:400px;">
+                    <div style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center;">
+                        <img src="images/report_sample2.png" alt="일보 샘플 2" style="width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+                        <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">발행 일보 예시 (2026-03-21)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 분석 프로세스 -->
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">AI 분석 프로세스</h3>
+        <div class="process-grid" style="margin-bottom: 32px;">
+            <div class="glass-card process-step">
+                <div class="step-number step-num-blue">1</div>
+                <h4>일보 업로드</h4>
+                <p>웹 브라우저에서 일보 이미지(PNG/JPG)를 드래그 앤 드롭으로 업로드합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-purple">2</div>
+                <h4>AI가 읽고 분석</h4>
+                <p>Gemini Vision OCR &rarr; 핵심이슈 추출 &rarr; 역할별 요약을 자동 실행합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-green">3</div>
+                <h4>인사이트 확인</h4>
+                <p>핵심이슈 3가지, 임원용/실무자용 요약 탭에서 분석 결과를 확인합니다.</p>
+            </div>
+            <div class="glass-card process-step">
+                <div class="step-number step-num-yellow">4</div>
+                <h4>추가 질문</h4>
+                <p>챗봇에서 "TAT 병목은?" "Worst 10 조치 필요한 건?" 등 자유롭게 질문합니다.</p>
+            </div>
+        </div>
+
+        <!-- AI 분석 결과 예시 -->
+        <div class="grid-2">
             <div class="glass-card">
-                <div class="card-icon icon-red">&#127919;</div>
-                <h3>역할별 맞춤 요약</h3>
-                <p>임원용(15초 핵심 브리핑)과 실무자용(즉시 조치 Top 3, TAT 병목) 두 가지 요약 제공</p>
+                <h3>&#128308; 핵심이슈 추출 결과 (예시)</h3>
+                <div style="margin-top:12px; font-size:0.88rem; color:var(--text-secondary);">
+                    <div style="padding:12px; background:rgba(248,113,113,0.06); border-radius:10px; border-left:3px solid var(--accent-red); margin-bottom:10px;">
+                        <strong style="color:var(--accent-red);">&#128308; [긴급] B동 PHOTO 수동반송율 급증</strong><br>
+                        금일 12.3% (전일 8.7%, +3.6%p 악화). AGV #3 고장 영향 추정.<br>
+                        <span style="color:var(--accent-blue);">&rarr; AGV #3 긴급 복구 + B동 수동반송 인력 증원 필요</span>
+                    </div>
+                    <div style="padding:12px; background:rgba(251,191,36,0.06); border-radius:10px; border-left:3px solid var(--accent-yellow); margin-bottom:10px;">
+                        <strong style="color:var(--accent-yellow);">&#128992; [주의] TAT 대기시간 전일 대비 15분 증가</strong><br>
+                        금일 대기 78.5분 (전일 63.2분). C동 CMP 구간 적체 원인.<br>
+                        <span style="color:var(--accent-blue);">&rarr; C동 CMP 카세트 적체 원인 파악 및 경로 재조정</span>
+                    </div>
+                    <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border-left:3px solid var(--accent-green);">
+                        <strong style="color:var(--accent-green);">&#128994; [양호] 월간 목표 달성률 95.2% 유지</strong><br>
+                        3월 일평균 수작업 482건 (목표 507건). 전월 대비 2.1%p 개선.<br>
+                        <span style="color:var(--accent-blue);">&rarr; 현 추세 유지 시 월말 목표 달성 가능</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3>&#128172; 대화형 Q&A (예시)</h3>
+                <div style="margin-top:12px; font-size:0.88rem;">
+                    <!-- User -->
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+                        <div style="padding:10px 14px; border-radius:14px 14px 2px 14px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:70%; font-size:0.85rem;">
+                            오늘 가장 큰 이슈가 뭐야?
+                        </div>
+                    </div>
+                    <!-- AI -->
+                    <div style="display:flex; justify-content:flex-start; margin-bottom:14px;">
+                        <div style="padding:10px 14px; border-radius:14px 14px 14px 2px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:80%; font-size:0.85rem; color:var(--text-secondary);">
+                            가장 큰 이슈는 <strong style="color:var(--accent-red);">B동 PHOTO 수동반송율 12.3%</strong>입니다.
+                            전일 8.7% 대비 3.6%p 악화되었으며, AGV #3 고장(30분 다운타임)이 주 원인으로 보입니다.
+                        </div>
+                    </div>
+                    <!-- User -->
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+                        <div style="padding:10px 14px; border-radius:14px 14px 2px 14px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:70%; font-size:0.85rem;">
+                            Worst 10 중 즉시 조치가 필요한 건?
+                        </div>
+                    </div>
+                    <!-- AI -->
+                    <div style="display:flex; justify-content:flex-start;">
+                        <div style="padding:10px 14px; border-radius:14px 14px 14px 2px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:80%; font-size:0.85rem; color:var(--text-secondary);">
+                            Worst 1~3위 중 즉시 조치 필요한 건:<br>
+                            <strong style="color:var(--text-primary);">1위: B동-PHOTO</strong> (금일 98건, 전일 52건, +46건)<br>
+                            <strong style="color:var(--text-primary);">2위: C동-CMP</strong> (금일 87건, 전일 61건, +26건)<br>
+                            두 건 모두 설비 이슈와 연관되어 설비팀 협조가 필요합니다.
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -851,351 +654,77 @@
 
 <div class="divider"></div>
 
-<!-- Architecture -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- ARCHITECTURE -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="architecture">
     <div class="container">
         <div class="section-label">Architecture</div>
         <h2 class="section-title">시스템 아키텍처</h2>
         <p class="section-desc">
-            NiceGUI 기반 웹 앱이 Matplotlib 렌더링 엔진과 Gemini AI 분석 모듈을 연결합니다.
+            NiceGUI 웹앱이 Gemini AI 분석 모듈과 연결되어 동작합니다.
         </p>
 
-        <div class="arch-diagram">
-            <h3 style="text-align:center; margin-bottom:28px; color: var(--text-secondary); font-size:0.9rem; font-weight:500;">Data Flow</h3>
-            <div class="arch-flow">
-                <div class="arch-node node-input">
-                    &#128196; 일보 이미지<br><small>PNG/JPG Upload</small>
-                </div>
-                <span class="arch-arrow">&rarr;</span>
-                <div class="arch-node node-ai">
-                    &#129504; Gemini Vision<br><small>OCR + 구조화</small>
-                </div>
-                <span class="arch-arrow">&rarr;</span>
-                <div class="arch-node node-process">
-                    &#128300; AI 분석기<br><small>이슈/요약/챗봇</small>
-                </div>
-                <span class="arch-arrow">&rarr;</span>
-                <div class="arch-node node-output">
-                    &#128203; 분석 결과<br><small>대시보드 출력</small>
-                </div>
-            </div>
-
-            <div style="margin-top:32px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.06);">
-                <h3 style="text-align:center; margin-bottom:28px; color: var(--text-secondary); font-size:0.9rem; font-weight:500;">Report Generation Flow</h3>
-                <div class="arch-flow">
-                    <div class="arch-node node-input">
-                        &#128197; 날짜 범위<br><small>사용자 입력</small>
-                    </div>
-                    <span class="arch-arrow">&rarr;</span>
-                    <div class="arch-node node-process">
-                        &#128190; 데이터 생성<br><small>sample_data.py</small>
-                    </div>
-                    <span class="arch-arrow">&rarr;</span>
-                    <div class="arch-node node-ai">
-                        &#127912; Matplotlib<br><small>차트 13종 렌더링</small>
-                    </div>
-                    <span class="arch-arrow">&rarr;</span>
-                    <div class="arch-node node-output">
-                        &#128444; PNG 일보<br><small>다운로드 가능</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- File Structure -->
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">프로젝트 구조</h3>
-        <div class="code-block">
+        <div class="code-block" style="margin-bottom: 32px;">
 <span class="comment">daily-report-agent/</span>
-├── <span class="cmd">main.py</span>              <span class="comment"># CLI 진입점 (단일 일보 생성)</span>
-├── <span class="cmd">app.py</span>               <span class="comment"># NiceGUI 웹앱 (일보 생성기 + AI Agent)</span>
+├── <span class="cmd">app.py</span>               <span class="comment"># NiceGUI 웹앱 (메인: AI 분석 Agent)</span>
 ├── <span class="cmd">ai_analyzer.py</span>       <span class="comment"># Gemini AI 분석 모듈 (OCR/이슈/요약/챗봇)</span>
-├── <span class="cmd">report_generator.py</span>  <span class="comment"># Matplotlib 리포트 이미지 렌더링</span>
-├── <span class="cmd">sample_data.py</span>       <span class="comment"># 시드 기반 샘플 데이터 생성</span>
-├── <span class="cmd">requirements.txt</span>     <span class="comment"># Python 의존성</span>
+├── <span class="cmd">report_generator.py</span>  <span class="comment"># 데모용 일보 이미지 렌더링 (보조 기능)</span>
+├── <span class="cmd">sample_data.py</span>       <span class="comment"># 데모용 샘플 데이터 생성 (보조 기능)</span>
+├── <span class="cmd">main.py</span>              <span class="comment"># CLI 진입점</span>
 ├── prompts/
 │   ├── <span class="flag">ocr_extract.txt</span>  <span class="comment"># OCR 구조화 프롬프트</span>
 │   ├── <span class="flag">key_issues.txt</span>   <span class="comment"># 핵심이슈 추출 프롬프트</span>
 │   ├── <span class="flag">executive.txt</span>    <span class="comment"># 임원용 요약 프롬프트</span>
 │   ├── <span class="flag">operator.txt</span>     <span class="comment"># 실무자용 요약 프롬프트</span>
 │   └── <span class="flag">chat_system.txt</span>  <span class="comment"># 챗봇 시스템 프롬프트</span>
-├── output/              <span class="comment"># 생성된 일보 PNG 저장</span>
 └── uploads/             <span class="comment"># 업로드된 일보 이미지</span>
         </div>
-    </div>
-</section>
 
-<div class="divider"></div>
-
-<!-- Features Detail -->
-<section id="features">
-    <div class="container">
-        <div class="section-label">Features</div>
-        <h2 class="section-title">주요 기능 상세</h2>
-        <p class="section-desc">
-            현재 구현되어 있는 기능들의 상세 설명입니다.
-        </p>
-
-        <!-- Feature 1: Report Generation -->
-        <div class="glass-card" style="margin-bottom: 24px;">
-            <h3>&#128196; 일보 이미지 자동 생성</h3>
-            <p style="margin-bottom: 20px;">
-                사용자가 시작일과 생성 개수를 지정하면, 날짜별로 고해상도 PNG 일보 이미지를 배치 생성합니다.
-                날짜 기반 시드를 사용하여 동일 날짜에 대해 항상 동일한 데이터를 재현합니다.
-            </p>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>차트 종류</th>
-                        <th>기간</th>
-                        <th>설명</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>수작업 현황 트렌드</td><td>월/주/일</td><td>수작업 건수 바 차트</td></tr>
-                    <tr><td>목표 vs 실적</td><td>13개월</td><td>일평균 건수 비교 (달성률 색상 코딩)</td></tr>
-                    <tr><td>수동반송수/반송율</td><td>월/주/일</td><td>이중 축 차트 (바 + 라인)</td></tr>
-                    <tr><td>반송 우선순위 변경</td><td>월/주/일</td><td>변경 건수 트렌드</td></tr>
-                    <tr><td>LOT 우선순위</td><td>월/주/일</td><td>LOT 우선순위 건수 트렌드</td></tr>
-                    <tr><td>기준정보/가중치 변경</td><td>월/주/일</td><td>기준정보 변경 건수</td></tr>
-                    <tr><td>TAT (Turn Around Time)</td><td>월/주/일</td><td>가공/검사/운반/대기/Hold 스택 바</td></tr>
-                    <tr><td>카세트 수동반송</td><td>월/주/일</td><td>Load/Unload/STK 그룹 바</td></tr>
-                    <tr><td>공정군별 수동반송수</td><td>금일</td><td>DIFF/PHOTO/ETCH 등 7개 공정군</td></tr>
-                    <tr><td>LOT 우선순위별 재공</td><td>금일</td><td>Hot/Normal/Low/Hold 파이 차트</td></tr>
-                    <tr><td>핵심 KPI 요약</td><td>금일</td><td>수작업 건수/달성률/반송율/TAT</td></tr>
-                    <tr><td>Worst 10 테이블</td><td>금일</td><td>부서-공정별 전일비교 증감 상위 10</td></tr>
-                    <tr><td>주요 이슈</td><td>금일</td><td>AGV 고장, 긴급 LOT 등 특이사항</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Feature 2: AI Analysis -->
-        <div class="glass-card" style="margin-bottom: 24px;">
-            <h3>&#129504; AI 분석 Agent (Gemini 2.0 Flash)</h3>
-            <p style="margin-bottom: 20px;">
-                5개의 전문 프롬프트를 활용한 멀티 스텝 AI 분석 파이프라인입니다.
-            </p>
-            <div class="grid-2" style="gap: 16px;">
-                <div style="padding: 16px; background: rgba(96,165,250,0.06); border-radius: 12px; border: 1px solid rgba(96,165,250,0.15);">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-blue);">Step 1. OCR 추출</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
-                        Gemini Vision으로 일보 이미지를 읽어 JSON으로 구조화. 차트 값은 바 높이/파이 비율로 추정.
-                    </p>
-                </div>
-                <div style="padding: 16px; background: rgba(167,139,250,0.06); border-radius: 12px; border: 1px solid rgba(167,139,250,0.15);">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-purple);">Step 2. 핵심이슈 추출</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
-                        전일비교 데이터에서 핵심 이슈 3가지 추출. 긴급도별 색상 코딩 (빨강/노랑/초록).
-                    </p>
-                </div>
-                <div style="padding: 16px; background: rgba(52,211,153,0.06); border-radius: 12px; border: 1px solid rgba(52,211,153,0.15);">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-green);">Step 3. 역할별 맞춤 요약</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
-                        임원용: 15초 핵심 브리핑, 월간 달성률, 악화 알림.
-                        실무자용: 즉시 조치 Top 3, TAT 병목 구간.
-                    </p>
-                </div>
-                <div style="padding: 16px; background: rgba(251,191,36,0.06); border-radius: 12px; border: 1px solid rgba(251,191,36,0.15);">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--accent-yellow);">Step 4. 대화형 챗봇</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
-                        일보 데이터를 컨텍스트로 자유 질문. 대화 히스토리 유지. 추천 질문 4종 제공.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Feature 3: UI -->
-        <div class="glass-card">
-            <h3>&#127912; Premium Glassmorphism UI</h3>
-            <p>
-                다크 테마 기반의 Glassmorphism 디자인 시스템을 적용했습니다.
-                Animated Mesh Gradient 배경, Floating Particles 효과, Glass 카드,
-                Progress Bar 애니메이션, Fade-up 전환 등 프리미엄 UX를 제공합니다.
-                NiceGUI + Quasar 프레임워크 기반으로 반응형 레이아웃을 지원합니다.
-            </p>
-        </div>
-    </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Screenshots / Demo -->
-<section id="screenshots">
-    <div class="container">
-        <div class="section-label">Demo</div>
-        <h2 class="section-title">실제 화면 및 산출물</h2>
-        <p class="section-desc">
-            현재 구현된 시스템의 실제 출력물과 UI 화면입니다.
-        </p>
-
-        <!-- Report Sample -->
-        <div class="glass-card" style="margin-bottom: 24px;">
-            <h3>&#128444; 자동 생성 일보 (PNG 출력물)</h3>
-            <p style="margin-bottom: 20px;">
-                아래는 시스템이 자동 생성한 실제 일보 이미지입니다. 13종의 차트와 KPI, Worst 10 테이블, 주요 이슈가 하나의 이미지에 포함됩니다.
-            </p>
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-                <div style="flex:1; min-width:280px; max-width:400px;">
-                    <div style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center;">
-                        <img src="images/report_sample.png" alt="일보 샘플 1" style="width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
-                        <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">2026-03-20 일보</p>
-                    </div>
-                </div>
-                <div style="flex:1; min-width:280px; max-width:400px;">
-                    <div style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center;">
-                        <img src="images/report_sample2.png" alt="일보 샘플 2" style="width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
-                        <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">2026-03-21 일보</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Web UI Description -->
-        <div class="grid-2">
-            <div class="glass-card">
-                <h3>&#127760; 일보 생성기 페이지 (<code>/</code>)</h3>
-                <p style="margin-bottom:12px;">웹 브라우저에서 접속하는 메인 페이지입니다.</p>
-                <ul style="list-style:none; font-size:0.88rem; color:var(--text-secondary);">
-                    <li style="padding:6px 0;">&#8226; 시작일/생성 개수 입력 폼</li>
-                    <li style="padding:6px 0;">&#8226; 실시간 프로그레스 바 (배치 생성)</li>
-                    <li style="padding:6px 0;">&#8226; 통계 대시보드 (생성 완료/총 수작업/평균 달성률)</li>
-                    <li style="padding:6px 0;">&#8226; 결과 카드 목록 (썸네일 + 핵심 지표 뱃지)</li>
-                    <li style="padding:6px 0;">&#8226; PNG 개별 다운로드 버튼</li>
-                    <li style="padding:6px 0;">&#8226; Glassmorphism 다크 테마 + 파티클 애니메이션</li>
-                </ul>
-            </div>
-            <div class="glass-card">
-                <h3>&#129504; AI 분석 Agent 페이지 (<code>/ai</code>)</h3>
-                <p style="margin-bottom:12px;">일보 이미지를 AI가 분석하는 페이지입니다.</p>
-                <ul style="list-style:none; font-size:0.88rem; color:var(--text-secondary);">
-                    <li style="padding:6px 0;">&#8226; 일보 이미지 업로드 (PNG/JPG 드래그 앤 드롭)</li>
-                    <li style="padding:6px 0;">&#8226; "샘플 데이터로 테스트" 원클릭 시작</li>
-                    <li style="padding:6px 0;">&#8226; OCR 진행 상태 표시 (3단계 로딩)</li>
-                    <li style="padding:6px 0;">&#8226; 핵심이슈 카드 (긴급도별 색상 코딩)</li>
-                    <li style="padding:6px 0;">&#8226; 임원용/실무자용 탭 요약</li>
-                    <li style="padding:6px 0;">&#8226; 대화형 챗봇 (추천 질문 4종 + 자유 질문)</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Current Process -->
-<section id="process">
-    <div class="container">
-        <div class="section-label">Current Process</div>
-        <h2 class="section-title">현재 동작 프로세스</h2>
-        <p class="section-desc">
-            두 가지 메인 워크플로우가 웹 앱에서 동작합니다.
-        </p>
-
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">
-            Workflow 1: 일보 생성기 <span class="badge-inline badge-done">/ 페이지</span>
-        </h3>
-        <div class="process-grid" style="margin-bottom: 48px;">
-            <div class="glass-card process-step">
-                <div class="step-number step-num-blue">1</div>
-                <h4>날짜/개수 입력</h4>
-                <p>시작일(YYYY-MM-DD)과 생성 개수(1~90일)를 입력합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-purple">2</div>
-                <h4>데이터 생성</h4>
-                <p>날짜 시드 기반으로 10개 카테고리의 샘플 데이터를 생성합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-green">3</div>
-                <h4>차트 렌더링</h4>
-                <p>Matplotlib로 22x72 인치 캔버스에 13종 차트 + 테이블을 렌더링합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-yellow">4</div>
-                <h4>결과 출력</h4>
-                <p>PNG 저장, 통계 요약(총 수작업/평균 달성률), 카드형 결과 목록을 표시합니다.</p>
-            </div>
-        </div>
-
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">
-            Workflow 2: AI 분석 Agent <span class="badge-inline badge-wip">/ai 페이지</span>
-        </h3>
-        <div class="process-grid">
-            <div class="glass-card process-step">
-                <div class="step-number step-num-blue">1</div>
-                <h4>이미지 업로드</h4>
-                <p>일보 PNG/JPG를 업로드하거나, "샘플 데이터로 테스트" 버튼으로 바로 시작합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-purple">2</div>
-                <h4>OCR + 구조화</h4>
-                <p>Gemini Vision이 이미지를 읽어 JSON으로 구조화합니다. 차트 값도 추정 추출합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-green">3</div>
-                <h4>AI 분석</h4>
-                <p>핵심이슈 3가지 추출 + 임원용/실무자용 맞춤 요약을 병렬 생성합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-yellow">4</div>
-                <h4>대화형 Q&A</h4>
-                <p>분석 결과를 컨텍스트로 자유 질문. 추천 질문 버튼 4종으로 빠른 인사이트를 도출합니다.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Tech Stack -->
-<section id="techstack">
-    <div class="container">
-        <div class="section-label">Tech Stack</div>
-        <h2 class="section-title">기술 스택</h2>
-        <p class="section-desc">
-            가볍고 효과적인 기술 조합으로 빠르게 프로토타이핑했습니다.
-        </p>
-
-        <div class="grid-3" style="margin-bottom: 24px;">
+        <!-- Tech Stack -->
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">기술 스택</h3>
+        <div class="grid-3">
             <div class="tech-item">
-                <div class="card-icon icon-green" style="margin-bottom:0; flex-shrink:0;">&#128013;</div>
+                <div class="card-icon icon-green" style="margin-bottom:0; flex-shrink:0;">&#129504;</div>
+                <div>
+                    <div class="tech-name">Gemini 2.0 Flash</div>
+                    <div class="tech-desc">Vision OCR + 분석 + 요약 + 챗봇</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-blue" style="margin-bottom:0; flex-shrink:0;">&#127760;</div>
+                <div>
+                    <div class="tech-name">NiceGUI (FastAPI)</div>
+                    <div class="tech-desc">웹 프레임워크</div>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="card-icon icon-purple" style="margin-bottom:0; flex-shrink:0;">&#128013;</div>
                 <div>
                     <div class="tech-name">Python 3.11</div>
                     <div class="tech-desc">메인 런타임</div>
                 </div>
             </div>
             <div class="tech-item">
-                <div class="card-icon icon-blue" style="margin-bottom:0; flex-shrink:0;">&#127760;</div>
+                <div class="card-icon icon-yellow" style="margin-bottom:0; flex-shrink:0;">&#128274;</div>
                 <div>
-                    <div class="tech-name">NiceGUI</div>
-                    <div class="tech-desc">웹 프레임워크 (FastAPI 기반)</div>
+                    <div class="tech-name">httpx + SSL 우회</div>
+                    <div class="tech-desc">사내망 환경 지원</div>
                 </div>
             </div>
             <div class="tech-item">
-                <div class="card-icon icon-purple" style="margin-bottom:0; flex-shrink:0;">&#129504;</div>
-                <div>
-                    <div class="tech-name">Gemini 2.0 Flash</div>
-                    <div class="tech-desc">AI 모델 (OCR + 분석 + 챗봇)</div>
-                </div>
-            </div>
-            <div class="tech-item">
-                <div class="card-icon icon-yellow" style="margin-bottom:0; flex-shrink:0;">&#128202;</div>
+                <div class="card-icon icon-red" style="margin-bottom:0; flex-shrink:0;">&#128202;</div>
                 <div>
                     <div class="tech-name">Matplotlib</div>
-                    <div class="tech-desc">차트/리포트 이미지 렌더링</div>
+                    <div class="tech-desc">데모용 일보 생성</div>
                 </div>
             </div>
             <div class="tech-item">
-                <div class="card-icon icon-red" style="margin-bottom:0; flex-shrink:0;">&#128248;</div>
+                <div class="card-icon icon-green" style="margin-bottom:0; flex-shrink:0;">&#128230;</div>
                 <div>
-                    <div class="tech-name">Pillow</div>
-                    <div class="tech-desc">이미지 처리</div>
-                </div>
-            </div>
-            <div class="tech-item">
-                <div class="card-icon icon-green" style="margin-bottom:0; flex-shrink:0;">&#128274;</div>
-                <div>
-                    <div class="tech-name">httpx + SSL</div>
-                    <div class="tech-desc">사내망 SSL 우회 HTTP 클라이언트</div>
+                    <div class="tech-name">google-genai SDK</div>
+                    <div class="tech-desc">Gemini API 클라이언트</div>
                 </div>
             </div>
         </div>
@@ -1204,7 +733,9 @@
 
 <div class="divider"></div>
 
-<!-- Development Progress -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PROGRESS: 개발 진행 경과 -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="progress">
     <div class="container">
         <div class="section-label">Development Progress</div>
@@ -1217,68 +748,52 @@
             <div class="timeline-item">
                 <div class="timeline-dot dot-done"></div>
                 <div class="timeline-phase phase-done">2026-03-19 (Day 1)</div>
-                <div class="timeline-title">프로젝트 착수 & 핵심 엔진 구현</div>
-                <div class="timeline-desc">프로젝트 구조 설계 및 핵심 모듈 개발 완료</div>
+                <div class="timeline-title">프로젝트 착수 &amp; 전체 구현</div>
+                <div class="timeline-desc">AI 분석 파이프라인 + 웹 UI 전체 구현 완료</div>
                 <ul class="timeline-tasks">
-                    <li class="task-done">프로젝트 구조 설계 및 초기화</li>
-                    <li class="task-done">sample_data.py &mdash; 날짜 시드 기반 10개 카테고리 데이터 생성기</li>
-                    <li class="task-done">report_generator.py &mdash; Matplotlib 13종 차트 렌더링 엔진</li>
-                    <li class="task-done">main.py &mdash; CLI 실행 지원</li>
-                    <li class="task-done">app.py &mdash; NiceGUI 웹 앱 (일보 생성기 페이지)</li>
+                    <li class="task-done">ai_analyzer.py &mdash; Gemini 2.0 Flash Vision OCR 모듈</li>
+                    <li class="task-done">OCR 구조화 프롬프트 설계 (이미지 &rarr; JSON)</li>
+                    <li class="task-done">핵심이슈 추출 프롬프트 설계 (3가지, 긴급도별)</li>
+                    <li class="task-done">역할별 맞춤 요약 프롬프트 (임원용 + 실무자용)</li>
+                    <li class="task-done">대화형 Q&A 챗봇 (시스템 프롬프트 + 히스토리)</li>
+                    <li class="task-done">NiceGUI AI 분석 Agent 페이지 (/ai)</li>
+                    <li class="task-done">데모용 일보 이미지 생성기 (보조 기능)</li>
                     <li class="task-done">Glassmorphism Premium UI/UX 디자인</li>
-                    <li class="task-done">배치 생성 + 프로그레스 바 + 통계 대시보드</li>
-                    <li class="task-done">ai_analyzer.py &mdash; Gemini 2.0 Flash 연동</li>
-                    <li class="task-done">5개 전문 프롬프트 템플릿 설계 (OCR/이슈/임원/실무/챗봇)</li>
-                    <li class="task-done">AI 분석 Agent 페이지 (/ai) 구현</li>
                 </ul>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot dot-done"></div>
                 <div class="timeline-phase phase-done">2026-03-20 (Day 2)</div>
-                <div class="timeline-title">AI 분석 고도화 & 안정화</div>
-                <div class="timeline-desc">전일비교 로직 강화 및 AI 컨텍스트 최적화</div>
+                <div class="timeline-title">AI 분석 고도화</div>
+                <div class="timeline-desc">전일비교 자동 계산 및 분석 품질 최적화</div>
                 <ul class="timeline-tasks">
                     <li class="task-done">전일비교 자동 계산 + 악화 지표 알림 로직</li>
                     <li class="task-done">AI 컨텍스트에 비교 요약 데이터 자동 주입</li>
                     <li class="task-done">역할별 요약 병렬 생성 (asyncio.gather)</li>
-                    <li class="task-done">대화형 챗봇 히스토리 유지 + 추천 질문</li>
-                    <li class="task-done">일보 이미지 5일치 배치 생성 검증</li>
+                    <li class="task-done">챗봇 추천 질문 4종 + 대화 히스토리 유지</li>
                 </ul>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot dot-done"></div>
                 <div class="timeline-phase phase-done">2026-03-26 (Day 3)</div>
-                <div class="timeline-title">GitHub 배포 & 문서화</div>
-                <div class="timeline-desc">코드 공개 및 GitHub Pages 프로젝트 문서 사이트 구축</div>
+                <div class="timeline-title">GitHub 배포 &amp; 문서화</div>
+                <div class="timeline-desc">코드 공개 및 발표용 프로젝트 문서 사이트 구축</div>
                 <ul class="timeline-tasks">
                     <li class="task-done">GitHub 레포지토리 생성 및 코드 Push</li>
                     <li class="task-done">GitHub Pages 프로젝트 문서 사이트 구축</li>
-                    <li class="task-done">발표용 종합 문서 작성 (배경/진행/로드맵/기대효과)</li>
-                </ul>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot dot-current"></div>
-                <div class="timeline-phase phase-current">Next &mdash; 진행 예정</div>
-                <div class="timeline-title">실데이터 연동 & 자동화</div>
-                <div class="timeline-desc">PoC에서 실서비스로 전환하기 위한 단계</div>
-                <ul class="timeline-tasks">
-                    <li class="task-todo">MES/WMS 시스템 데이터 소스 연동</li>
-                    <li class="task-todo">자동 스케줄링 (교대 시간 기준)</li>
-                    <li class="task-todo">이메일/Teams 알림 발송</li>
-                    <li class="task-todo">사용자 인증 및 권한 관리</li>
+                    <li class="task-done">발표용 종합 문서 (배경/파이프라인/진행/로드맵/기대효과/리스크)</li>
                 </ul>
             </div>
         </div>
 
-        <!-- 진행률 요약 -->
+        <!-- 진행률 -->
         <div class="glass-card" style="margin-top: 40px;">
-            <h3>&#128200; 전체 진행률 요약</h3>
+            <h3>&#128200; 전체 진행률</h3>
             <div style="margin-top: 20px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 1: 핵심 기능 구현</span>
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 1: AI 분석 파이프라인 구현</span>
                     <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--accent-green);">100%</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
@@ -1286,7 +801,7 @@
                 </div>
 
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 2: AI 분석 Agent</span>
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 2: 웹 UI + 프롬프트 고도화</span>
                     <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--accent-green);">100%</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
@@ -1294,7 +809,7 @@
                 </div>
 
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 3: 실데이터 연동</span>
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 3: 실데이터 연동 + 자동화</span>
                     <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
@@ -1302,15 +817,7 @@
                 </div>
 
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 4: 자동화 파이프라인</span>
-                    <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
-                </div>
-                <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px; margin-bottom:20px;">
-                    <div style="background:rgba(255,255,255,0.1); height:100%; border-radius:8px; width:0%;"></div>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:0.88rem; font-weight:600;">Phase 5: 고급 분석 & 확장</span>
+                    <span style="font-size:0.88rem; font-weight:600;">Phase 4: 고급 분석 + 확장</span>
                     <span style="font-size:0.85rem; font-family:'JetBrains Mono'; color:var(--text-muted);">0%</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.04); border-radius:8px; height:8px;">
@@ -1323,241 +830,94 @@
 
 <div class="divider"></div>
 
-<!-- Roadmap -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- ROADMAP -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="roadmap">
     <div class="container">
         <div class="section-label">Roadmap</div>
-        <h2 class="section-title">로드맵</h2>
+        <h2 class="section-title">로드맵 &amp; 다음 단계</h2>
         <p class="section-desc">
-            프로젝트의 현재 진행 상태와 앞으로의 계획입니다.
+            PoC에서 실서비스로 전환하기 위한 단계별 계획입니다.
         </p>
 
         <div class="timeline">
-            <!-- Phase 1 -->
             <div class="timeline-item">
                 <div class="timeline-dot dot-done"></div>
-                <div class="timeline-phase phase-done">Phase 1 &mdash; 완료</div>
-                <div class="timeline-title">핵심 기능 구현</div>
-                <div class="timeline-desc">일보 이미지 자동 생성 + 웹 UI 기본 구축</div>
+                <div class="timeline-phase phase-done">Phase 1~2 &mdash; 완료</div>
+                <div class="timeline-title">PoC 핵심 기능 구현</div>
+                <div class="timeline-desc">AI 분석 파이프라인 4단계 전체 구현 완료</div>
                 <ul class="timeline-tasks">
-                    <li class="task-done">Matplotlib 기반 13종 차트 렌더링 엔진 (report_generator.py)</li>
-                    <li class="task-done">날짜 시드 기반 샘플 데이터 생성기 (sample_data.py)</li>
-                    <li class="task-done">CLI 실행 지원 (main.py)</li>
-                    <li class="task-done">NiceGUI 웹 앱 기본 구조 (일보 생성기 페이지)</li>
-                    <li class="task-done">Glassmorphism 프리미엄 UI/UX</li>
-                    <li class="task-done">배치 일보 생성 (최대 90일치)</li>
-                    <li class="task-done">프로그레스 바 + 실시간 통계</li>
+                    <li class="task-done">Gemini Vision OCR (이미지 &rarr; 구조화 JSON)</li>
+                    <li class="task-done">핵심이슈 자동 추출 (3가지, 긴급도별 색상)</li>
+                    <li class="task-done">역할별 맞춤 요약 (임원용 + 실무자용)</li>
+                    <li class="task-done">대화형 Q&A 챗봇</li>
+                    <li class="task-done">전일비교 자동 분석 + 악화 지표 알림</li>
+                    <li class="task-done">웹 UI (NiceGUI + Glassmorphism)</li>
                 </ul>
             </div>
 
-            <!-- Phase 2 -->
-            <div class="timeline-item">
-                <div class="timeline-dot dot-done"></div>
-                <div class="timeline-phase phase-done">Phase 2 &mdash; 완료</div>
-                <div class="timeline-title">AI 분석 Agent</div>
-                <div class="timeline-desc">Gemini Vision OCR + 멀티 스텝 분석 파이프라인</div>
-                <ul class="timeline-tasks">
-                    <li class="task-done">Gemini 2.0 Flash Vision OCR (이미지 &rarr; 구조화 JSON)</li>
-                    <li class="task-done">핵심이슈 자동 추출 (3가지, 긴급도별 색상 코딩)</li>
-                    <li class="task-done">역할별 맞춤 요약 (임원용/실무자용)</li>
-                    <li class="task-done">대화형 Q&A 챗봇 (히스토리 유지, 추천 질문)</li>
-                    <li class="task-done">전일비교 자동 계산 + 악화 지표 알림</li>
-                    <li class="task-done">5개 전문 프롬프트 템플릿 설계</li>
-                </ul>
-            </div>
-
-            <!-- Phase 3 -->
             <div class="timeline-item">
                 <div class="timeline-dot dot-current"></div>
-                <div class="timeline-phase phase-current">Phase 3 &mdash; 진행 예정</div>
-                <div class="timeline-title">실데이터 연동</div>
-                <div class="timeline-desc">샘플 데이터를 실제 데이터 소스로 교체</div>
+                <div class="timeline-phase phase-current">Phase 3 &mdash; 다음 단계</div>
+                <div class="timeline-title">실무 적용 준비</div>
+                <div class="timeline-desc">실제 현장 일보와 연동하여 검증</div>
                 <ul class="timeline-tasks">
-                    <li class="task-todo">MES/WMS 시스템 API 연동 (수작업 로그 실시간 수집)</li>
-                    <li class="task-todo">Oracle/PostgreSQL DB 직접 조회 모듈</li>
-                    <li class="task-todo">AGV/OHT 반송 시스템 데이터 연동</li>
-                    <li class="task-todo">데이터 정합성 검증 로직</li>
-                    <li class="task-todo">날짜별 데이터 캐싱 (중복 생성 방지)</li>
+                    <li class="task-todo">실제 일보 이미지로 OCR 정확도 검증/튜닝</li>
+                    <li class="task-todo">일보 형식별 프롬프트 커스터마이징</li>
+                    <li class="task-todo">OCR 결과 사용자 수정 에디터 추가</li>
+                    <li class="task-todo">분석 결과 이메일/Teams 자동 발송</li>
+                    <li class="task-todo">일보 아카이브 및 이력 검색</li>
                 </ul>
             </div>
 
-            <!-- Phase 4 -->
             <div class="timeline-item">
                 <div class="timeline-dot dot-planned"></div>
                 <div class="timeline-phase phase-planned">Phase 4 &mdash; 계획</div>
-                <div class="timeline-title">자동화 파이프라인</div>
-                <div class="timeline-desc">스케줄러 기반 자동 일보 생성/배포</div>
+                <div class="timeline-title">자동화 &amp; 고급 분석</div>
+                <div class="timeline-desc">스케줄러 기반 자동 분석 + 예측 기능</div>
                 <ul class="timeline-tasks">
-                    <li class="task-todo">매일 정시 자동 일보 생성 (스케줄러)</li>
-                    <li class="task-todo">이메일/Teams/Slack 자동 발송</li>
+                    <li class="task-todo">일보 발행 시 자동 분석 트리거 (파일 감시/API)</li>
                     <li class="task-todo">이상치 탐지 시 긴급 알림</li>
-                    <li class="task-todo">일보 히스토리 아카이브 및 검색</li>
-                    <li class="task-todo">PDF 변환 및 인쇄 최적화</li>
-                </ul>
-            </div>
-
-            <!-- Phase 5 -->
-            <div class="timeline-item">
-                <div class="timeline-dot dot-planned"></div>
-                <div class="timeline-phase phase-planned">Phase 5 &mdash; 계획</div>
-                <div class="timeline-title">고급 분석 & 확장</div>
-                <div class="timeline-desc">예측 분석, 멀티 팩토리 지원</div>
-                <ul class="timeline-tasks">
-                    <li class="task-todo">수작업 건수 예측 모델 (시계열 분석)</li>
-                    <li class="task-todo">이상 패턴 자동 감지 (Anomaly Detection)</li>
-                    <li class="task-todo">멀티 FAB/라인 통합 대시보드</li>
-                    <li class="task-todo">사용자 권한 관리 (열람/편집/관리자)</li>
-                    <li class="task-todo">모바일 최적화 (PWA)</li>
+                    <li class="task-todo">과거 일보 이력 기반 트렌드 예측</li>
+                    <li class="task-todo">지식베이스 축적 (과거 이슈 &rarr; 조치안 자동 추천)</li>
+                    <li class="task-todo">멀티 FAB 통합 대시보드</li>
                 </ul>
             </div>
         </div>
-    </div>
-</section>
 
-<div class="divider"></div>
-
-<!-- Next Steps / Improvements -->
-<section id="next-steps">
-    <div class="container">
-        <div class="section-label">Next Steps</div>
-        <h2 class="section-title">다음에 해야 할 일</h2>
-        <p class="section-desc">
-            현재 PoC 단계에서 프로덕션으로 가기 위한 우선순위 높은 작업 목록입니다.
-        </p>
-
-        <div class="grid-2">
-            <div class="glass-card">
-                <div class="card-icon icon-red">&#128293;</div>
-                <h3>
-                    <span class="badge-inline" style="background: rgba(248,113,113,0.2); color: var(--accent-red);">HIGH</span>
-                    실데이터 연동
-                </h3>
-                <p>
-                    현재 <code>sample_data.py</code>의 랜덤 데이터를 실제 MES/WMS 시스템 데이터로 교체.
-                    Oracle JDBC 또는 REST API를 통해 수작업 로그를 실시간 수집하는 데이터 어댑터 레이어를 구현해야 합니다.
-                </p>
-            </div>
-
-            <div class="glass-card">
-                <div class="card-icon icon-red">&#128293;</div>
-                <h3>
-                    <span class="badge-inline" style="background: rgba(248,113,113,0.2); color: var(--accent-red);">HIGH</span>
-                    인증 및 보안
-                </h3>
-                <p>
-                    사내 SSO/LDAP 연동으로 사용자 인증 추가. API 키 환경 변수화.
-                    업로드 파일 검증. 현재 Gemini API 키가 파일로 관리되므로 시크릿 매니저 연동 필요.
-                </p>
-            </div>
-
-            <div class="glass-card">
-                <div class="card-icon icon-yellow">&#9889;</div>
-                <h3>
-                    <span class="badge-inline" style="background: rgba(251,191,36,0.2); color: var(--accent-yellow);">MED</span>
-                    자동 스케줄링
-                </h3>
-                <p>
-                    APScheduler 또는 cron 기반으로 매일 정시(교대 시간) 자동 일보 생성.
-                    생성 완료 시 이메일/Teams Webhook으로 알림 발송.
-                </p>
-            </div>
-
-            <div class="glass-card">
-                <div class="card-icon icon-yellow">&#9889;</div>
-                <h3>
-                    <span class="badge-inline" style="background: rgba(251,191,36,0.2); color: var(--accent-yellow);">MED</span>
-                    OCR 정확도 개선
-                </h3>
-                <p>
-                    현재 단일 이미지 OCR에서 멀티 페이지/PDF 지원 확장.
-                    OCR 결과를 사용자가 수정 가능한 에디터 추가.
-                    구조화 실패 시 fallback 전략 강화.
-                </p>
-            </div>
-
-            <div class="glass-card">
-                <div class="card-icon icon-blue">&#128161;</div>
-                <h3>
-                    <span class="badge-inline" style="background: rgba(96,165,250,0.2); color: var(--accent-blue);">LOW</span>
-                    일보 커스터마이징
-                </h3>
-                <p>
-                    차트 종류/순서/색상을 사용자가 설정 가능하게. 부서/라인별 필터.
-                    일보 템플릿 관리 (표준/간이/경영진 등).
-                </p>
-            </div>
-
-            <div class="glass-card">
-                <div class="card-icon icon-blue">&#128161;</div>
-                <h3>
-                    <span class="badge-inline" style="background: rgba(96,165,250,0.2); color: var(--accent-blue);">LOW</span>
-                    테스트 & CI/CD
-                </h3>
-                <p>
-                    pytest 기반 유닛 테스트 작성. GitHub Actions CI 파이프라인 구축.
-                    Docker 컨테이너화로 배포 표준화.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Nice to Have -->
-<section id="enhancements">
-    <div class="container">
-        <div class="section-label">Enhancements</div>
-        <h2 class="section-title">추가되면 좋은 기능들</h2>
-        <p class="section-desc">
-            향후 프로덕션 전환 시 고려할 수 있는 확장 기능입니다.
-        </p>
-
+        <!-- 추가되면 좋은 기능 -->
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin: 48px 0 20px;">추가 확장 아이디어</h3>
         <div class="grid-3">
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128200;</div>
-                <h3 style="justify-content:center;">수작업 예측 모델</h3>
-                <p>과거 데이터 기반 시계열 예측으로 내일/다음 주 수작업 건수를 사전 예측. 인력 배치 최적화에 활용.</p>
+            <div class="glass-card" style="text-align:center; padding:24px 16px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">&#128203;</div>
+                <h3 style="justify-content:center; font-size:1rem;">PDF/Excel 내보내기</h3>
+                <p style="font-size:0.82rem;">AI 분석 결과를 PDF로 저장하여 오프라인 공유 및 인쇄</p>
             </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128680;</div>
-                <h3 style="justify-content:center;">이상치 자동 알림</h3>
-                <p>통계적 이상치 탐지 (Z-score, IQR)로 비정상 패턴 감지 시 즉시 알림. Slack/Teams/카카오워크 연동.</p>
+            <div class="glass-card" style="text-align:center; padding:24px 16px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">&#127891;</div>
+                <h3 style="justify-content:center; font-size:1rem;">과거 조치안 추천</h3>
+                <p style="font-size:0.82rem;">유사 이슈 발생 시 과거 조치 결과를 RAG 기반으로 자동 추천</p>
             </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128203;</div>
-                <h3 style="justify-content:center;">PDF/Excel 내보내기</h3>
-                <p>PNG 외에 PDF, Excel 형식 다운로드 지원. 인쇄 최적화 레이아웃. 월간/주간 종합 보고서.</p>
+            <div class="glass-card" style="text-align:center; padding:24px 16px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">&#128241;</div>
+                <h3 style="justify-content:center; font-size:1rem;">모바일 PWA</h3>
+                <p style="font-size:0.82rem;">현장 작업자가 모바일에서 분석 결과 확인 및 질문</p>
             </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#127891;</div>
-                <h3 style="justify-content:center;">지식베이스 축적</h3>
-                <p>과거 이슈와 조치 결과를 DB에 축적. 유사 이슈 발생 시 과거 조치안 자동 추천. RAG 기반 검색.</p>
+            <div class="glass-card" style="text-align:center; padding:24px 16px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">&#128268;</div>
+                <h3 style="justify-content:center; font-size:1rem;">Jira 연동</h3>
+                <p style="font-size:0.82rem;">핵심이슈에서 바로 Jira 티켓 생성. 조치 추적 자동화</p>
             </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128241;</div>
-                <h3 style="justify-content:center;">모바일 PWA</h3>
-                <p>현장 작업자가 모바일에서 일보를 확인하고, 이슈를 바로 보고할 수 있는 PWA. 오프라인 캐시 지원.</p>
+            <div class="glass-card" style="text-align:center; padding:24px 16px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">&#128200;</div>
+                <h3 style="justify-content:center; font-size:1rem;">수작업 예측</h3>
+                <p style="font-size:0.82rem;">과거 데이터 기반 시계열 예측으로 내일 수작업 건수 사전 예측</p>
             </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128101;</div>
-                <h3 style="justify-content:center;">멀티 FAB 대시보드</h3>
-                <p>여러 FAB/라인의 일보를 통합 조회하는 상위 대시보드. 교차 FAB 비교 분석. 경영진 종합 뷰.</p>
-            </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128268;</div>
-                <h3 style="justify-content:center;">Jira/Confluence 연동</h3>
-                <p>이슈 자동 티켓 생성. 일보를 Confluence 페이지에 자동 게시. ITSM 워크플로우 연결.</p>
-            </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#127916;</div>
-                <h3 style="justify-content:center;">실시간 대시보드</h3>
-                <p>WebSocket 기반 실시간 데이터 스트리밍. 수작업 발생 즉시 대시보드 갱신. 라이브 모니터링.</p>
-            </div>
-            <div class="glass-card" style="text-align:center; padding: 28px 20px;">
-                <div style="font-size: 2rem; margin-bottom: 12px;">&#128373;</div>
-                <h3 style="justify-content:center;">근본 원인 분석</h3>
-                <p>수작업 증가의 근본 원인을 AI가 자동 추론. 설비 이력, 인원 배치, 환경 변수를 종합 분석.</p>
+            <div class="glass-card" style="text-align:center; padding:24px 16px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">&#128101;</div>
+                <h3 style="justify-content:center; font-size:1rem;">멀티 FAB</h3>
+                <p style="font-size:0.82rem;">여러 FAB 일보를 통합 조회하는 경영진 종합 뷰</p>
             </div>
         </div>
     </div>
@@ -1565,55 +925,55 @@
 
 <div class="divider"></div>
 
-<!-- Expected Impact -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- IMPACT: 기대 효과 -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="impact">
     <div class="container">
         <div class="section-label">Expected Impact</div>
         <h2 class="section-title">기대 효과</h2>
         <p class="section-desc">
-            시스템 도입 시 예상되는 정량적/정성적 효과입니다.
+            AI 일보 분석 Agent 도입 시 예상되는 정량적/정성적 효과입니다.
         </p>
 
-        <!-- 정량적 효과 -->
         <div class="grid-4" style="margin-bottom: 32px;">
             <div class="glass-card stat-box" style="border-color: rgba(52,211,153,0.2);">
-                <div class="stat-value val-green">90%</div>
-                <div class="stat-label">일보 작성 시간 절감</div>
-                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">60분 &rarr; 5분 이내</p>
+                <div class="stat-value val-green">90%+</div>
+                <div class="stat-label">일보 분석 시간 절감</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">30분 &rarr; 3분 이내</p>
             </div>
             <div class="glass-card stat-box" style="border-color: rgba(96,165,250,0.2);">
-                <div class="stat-value val-blue">100%</div>
-                <div class="stat-label">포맷 표준화율</div>
-                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">작성자 무관 일관 품질</p>
+                <div class="stat-value val-blue">&lt;10s</div>
+                <div class="stat-label">핵심이슈 파악 시간</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">AI가 3가지 즉시 추출</p>
             </div>
             <div class="glass-card stat-box" style="border-color: rgba(167,139,250,0.2);">
-                <div class="stat-value val-purple">&lt;10s</div>
-                <div class="stat-label">핵심이슈 파악 시간</div>
-                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">수동 분석 30분 &rarr; AI 즉시</p>
+                <div class="stat-value val-purple">0건</div>
+                <div class="stat-label">이슈 누락</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">AI가 전체 데이터 분석</p>
             </div>
             <div class="glass-card stat-box" style="border-color: rgba(251,191,36,0.2);">
-                <div class="stat-value val-yellow">0건</div>
-                <div class="stat-label">수동 계산 오류</div>
-                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">전일비교 자동 계산</p>
+                <div class="stat-value val-yellow">2종</div>
+                <div class="stat-label">맞춤 요약 자동 생성</div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">임원 + 실무자 동시</p>
             </div>
         </div>
 
-        <!-- 정성적 효과 -->
         <div class="grid-2">
             <div class="glass-card">
                 <h3>&#128188; 경영 관점</h3>
                 <ul style="list-style:none; font-size:0.9rem; color:var(--text-secondary);">
                     <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text-primary);">의사결정 속도 향상</strong> &mdash; 임원용 15초 브리핑으로 핵심 지표 즉시 파악
+                        <strong style="color:var(--text-primary);">의사결정 속도 향상</strong> &mdash; 15초 브리핑으로 일보 핵심 즉시 파악
                     </li>
                     <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text-primary);">트렌드 가시성 확보</strong> &mdash; 월/주/일 자동 비교로 악화 추세 조기 감지
+                        <strong style="color:var(--text-primary);">악화 조기 감지</strong> &mdash; 전일비교 자동 분석으로 악화 추세 놓치지 않음
                     </li>
                     <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text-primary);">보고 체계 표준화</strong> &mdash; 교대조/작성자 무관 동일 품질 보장
+                        <strong style="color:var(--text-primary);">보고 품질 표준화</strong> &mdash; AI가 일관된 기준으로 분석, 사람에 따른 편차 제거
                     </li>
                     <li style="padding:8px 0;">
-                        <strong style="color:var(--text-primary);">AI 활용 선도 사례</strong> &mdash; 사내 AI 도입 확산의 레퍼런스 프로젝트
+                        <strong style="color:var(--text-primary);">AI 활용 선도 사례</strong> &mdash; 현장 밀착형 AI PoC로 사내 확산 레퍼런스
                     </li>
                 </ul>
             </div>
@@ -1621,16 +981,16 @@
                 <h3>&#128736; 현장 관점</h3>
                 <ul style="list-style:none; font-size:0.9rem; color:var(--text-secondary);">
                     <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text-primary);">단순 업무 해방</strong> &mdash; 반복적 일보 작성에서 벗어나 분석/개선에 집중
+                        <strong style="color:var(--text-primary);">분석 업무 해방</strong> &mdash; 일보 읽기/재가공 시간을 개선 활동에 투입 가능
                     </li>
                     <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text-primary);">실무 맞춤 인사이트</strong> &mdash; 즉시 조치 Top 3, TAT 병목 구간 바로 확인
+                        <strong style="color:var(--text-primary);">즉시 조치 가이드</strong> &mdash; "뭘 먼저 해야 하지?"에 대한 AI 답변 즉시 제공
                     </li>
                     <li style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text-primary);">대화형 질의</strong> &mdash; "Worst 10 중 즉시 조치가 필요한 건?" 바로 질문
+                        <strong style="color:var(--text-primary);">자유 질의</strong> &mdash; 일보에 대해 궁금한 점을 바로 질문, 데이터 재확인 불필요
                     </li>
                     <li style="padding:8px 0;">
-                        <strong style="color:var(--text-primary);">인수인계 용이</strong> &mdash; AI가 이슈 이력을 기억, 신규 투입 인원 온보딩 지원
+                        <strong style="color:var(--text-primary);">인수인계 지원</strong> &mdash; 교대조/신규 투입 시 AI가 이슈 히스토리 브리핑
                     </li>
                 </ul>
             </div>
@@ -1640,85 +1000,87 @@
 
 <div class="divider"></div>
 
-<!-- Challenges & Risks -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- RISKS: 도전 과제 -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="risks">
     <div class="container">
-        <div class="section-label">Challenges & Risks</div>
+        <div class="section-label">Challenges &amp; Risks</div>
         <h2 class="section-title">도전 과제 및 리스크</h2>
         <p class="section-desc">
-            프로덕션 전환 과정에서 예상되는 주요 도전 과제와 대응 방안입니다.
+            실서비스 전환 시 예상되는 주요 도전 과제와 대응 방안입니다.
         </p>
 
         <div class="grid-2">
             <div class="glass-card" style="border-left: 3px solid var(--accent-red);">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span class="badge-inline" style="background:rgba(248,113,113,0.2); color:var(--accent-red);">HIGH RISK</span>
+                <div style="margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(248,113,113,0.2); color:var(--accent-red);">HIGH</span>
                 </div>
-                <h3>실데이터 연동 복잡도</h3>
-                <p style="margin-bottom:12px;">MES/WMS 시스템별로 데이터 포맷, 접근 방식, 권한 체계가 상이. 데이터 정합성 검증이 핵심.</p>
+                <h3>OCR 정확도</h3>
+                <p style="margin-bottom:12px;">일보 이미지 품질(해상도, 글꼴, 레이아웃)에 따라 OCR 정확도가 달라질 수 있음. 특히 차트 수치 추정에 오차 발생 가능.</p>
                 <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
-                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
-                    <span style="color:var(--text-secondary); font-size:0.85rem;">데이터 어댑터 패턴으로 소스별 추상화. 단계적 연동 (1개 FAB &rarr; 전체 확장).</span>
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">실제 일보로 OCR 정확도 측정 &rarr; 프롬프트 튜닝. 사용자 수정 에디터 제공. 향후 데이터 직접 연동으로 OCR 의존 제거.</span>
                 </div>
             </div>
 
             <div class="glass-card" style="border-left: 3px solid var(--accent-red);">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span class="badge-inline" style="background:rgba(248,113,113,0.2); color:var(--accent-red);">HIGH RISK</span>
+                <div style="margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(248,113,113,0.2); color:var(--accent-red);">HIGH</span>
                 </div>
-                <h3>AI 분석 품질 일관성</h3>
-                <p style="margin-bottom:12px;">LLM 특성상 동일 데이터에 대해 다른 분석 결과를 생성할 수 있음. 핵심 수치 인용 정확도 관리 필요.</p>
+                <h3>AI 분석 일관성</h3>
+                <p style="margin-bottom:12px;">LLM 특성상 동일 데이터에 다른 분석을 생성할 수 있음. 핵심 수치 인용 정확도 관리 필요.</p>
                 <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
-                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
-                    <span style="color:var(--text-secondary); font-size:0.85rem;">프롬프트 엔지니어링 지속 개선. 사전 계산된 비교 데이터를 컨텍스트에 주입. 결과 검증 레이어 추가.</span>
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">사전 계산된 비교 데이터를 컨텍스트에 주입 (이미 적용). 프롬프트에 "추측 금지, 수치 근거 필수" 명시.</span>
                 </div>
             </div>
 
             <div class="glass-card" style="border-left: 3px solid var(--accent-yellow);">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span class="badge-inline" style="background:rgba(251,191,36,0.2); color:var(--accent-yellow);">MED RISK</span>
+                <div style="margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(251,191,36,0.2); color:var(--accent-yellow);">MED</span>
                 </div>
                 <h3>사내망 환경 제약</h3>
-                <p style="margin-bottom:12px;">SSL 인증서, 프록시, 방화벽 등 사내망 환경에서 외부 API (Gemini) 호출 안정성.</p>
+                <p style="margin-bottom:12px;">SSL/프록시/방화벽 환경에서 외부 Gemini API 호출 안정성.</p>
                 <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
-                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
-                    <span style="color:var(--text-secondary); font-size:0.85rem;">SSL SECLEVEL=0 우회 적용 완료. 재시도 로직 + 타임아웃 설정. 향후 온프레미스 모델 검토.</span>
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">SSL SECLEVEL=0 우회 적용 완료. 재시도/타임아웃 설정. 장기: 온프레미스 LLM 전환 검토.</span>
                 </div>
             </div>
 
             <div class="glass-card" style="border-left: 3px solid var(--accent-yellow);">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span class="badge-inline" style="background:rgba(251,191,36,0.2); color:var(--accent-yellow);">MED RISK</span>
-                </div>
-                <h3>사용자 수용성</h3>
-                <p style="margin-bottom:12px;">현장 작업자의 기존 업무 방식 변경 저항. AI 분석 결과에 대한 신뢰도 확보 시간 필요.</p>
-                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
-                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
-                    <span style="color:var(--text-secondary); font-size:0.85rem;">기존 일보와 병행 운영. 현장 피드백 반영 주기적 개선. 사용법 교육 및 챔피언 사용자 육성.</span>
-                </div>
-            </div>
-
-            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span class="badge-inline" style="background:rgba(96,165,250,0.2); color:var(--accent-blue);">LOW RISK</span>
-                </div>
-                <h3>API 비용 관리</h3>
-                <p style="margin-bottom:12px;">Gemini API 호출량 증가에 따른 비용. 특히 OCR + 분석 + 요약 + 챗봇 4단계 호출.</p>
-                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
-                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
-                    <span style="color:var(--text-secondary); font-size:0.85rem;">Gemini 2.0 Flash는 저비용 모델. 결과 캐싱으로 중복 호출 방지. 일일 사용량 모니터링.</span>
-                </div>
-            </div>
-
-            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span class="badge-inline" style="background:rgba(96,165,250,0.2); color:var(--accent-blue);">LOW RISK</span>
+                <div style="margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(251,191,36,0.2); color:var(--accent-yellow);">MED</span>
                 </div>
                 <h3>데이터 보안</h3>
-                <p style="margin-bottom:12px;">일보 데이터에 생산량, 설비 상태 등 민감 정보 포함. 외부 API로 전송 시 보안 이슈.</p>
+                <p style="margin-bottom:12px;">일보 이미지에 생산량, 설비 상태 등 민감 정보 포함. 외부 API 전송 시 보안 검토 필요.</p>
                 <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
-                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응 방안:</strong>
-                    <span style="color:var(--text-secondary); font-size:0.85rem;">데이터 마스킹/익명화 처리. 보안팀 검토 후 승인. 장기적으로 온프레미스 LLM 전환 검토.</span>
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">보안팀 검토 후 승인. 데이터 마스킹 처리. 장기: 온프레미스 모델로 전환.</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
+                <div style="margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(96,165,250,0.2); color:var(--accent-blue);">LOW</span>
+                </div>
+                <h3>사용자 수용성</h3>
+                <p style="margin-bottom:12px;">기존 방식 변경에 대한 저항. AI 분석 결과에 대한 신뢰 확보 시간.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">기존 방식과 병행 운영. 현장 피드백 반영. 챔피언 사용자 육성.</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 3px solid var(--accent-blue);">
+                <div style="margin-bottom:12px;">
+                    <span class="badge-inline" style="background:rgba(96,165,250,0.2); color:var(--accent-blue);">LOW</span>
+                </div>
+                <h3>API 비용</h3>
+                <p style="margin-bottom:12px;">일보당 OCR + 이슈 + 요약x2 + 챗봇 = 최소 4~5회 API 호출.</p>
+                <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border:1px solid rgba(52,211,153,0.15);">
+                    <strong style="color:var(--accent-green); font-size:0.85rem;">대응:</strong>
+                    <span style="color:var(--text-secondary); font-size:0.85rem;">Gemini 2.0 Flash는 저비용 모델. 결과 캐싱. 일일 사용량 모니터링.</span>
                 </div>
             </div>
         </div>
@@ -1727,23 +1089,22 @@
 
 <div class="divider"></div>
 
-<!-- Quick Start -->
+<!-- ══════════════════════════════════════════════════ -->
+<!-- QUICK START -->
+<!-- ══════════════════════════════════════════════════ -->
 <section id="quickstart">
     <div class="container">
         <div class="section-label">Quick Start</div>
         <h2 class="section-title">시작하기</h2>
-        <p class="section-desc">
-            로컬 환경에서 프로젝트를 실행하는 방법입니다.
-        </p>
+        <p class="section-desc">로컬 환경에서 바로 실행해볼 수 있습니다.</p>
 
-        <div class="glass-card" style="margin-bottom: 24px;">
-            <h3>&#9889; 설치 및 실행</h3>
-            <div class="code-block" style="margin-top: 16px;">
+        <div class="glass-card">
+            <div class="code-block" style="margin-top: 0;">
 <span class="comment"># 1. 저장소 클론</span>
 <span class="cmd">git clone</span> https://github.com/donchoru/daily-report-agent.git
 <span class="cmd">cd</span> daily-report-agent
 
-<span class="comment"># 2. 가상환경 생성 (Python 3.11)</span>
+<span class="comment"># 2. 가상환경 생성</span>
 <span class="cmd">uv venv</span> <span class="flag">--python python3.11</span> .venv
 <span class="cmd">source</span> .venv/bin/activate  <span class="comment"># Windows: .venv\Scripts\activate</span>
 
@@ -1755,59 +1116,7 @@
 
 <span class="comment"># 5. 웹 앱 실행</span>
 <span class="cmd">python</span> app.py
-<span class="comment"># http://localhost:8090 에서 접속</span>
-
-<span class="comment"># 또는 CLI로 단일 일보 생성</span>
-<span class="cmd">python</span> main.py <span class="flag">--date</span> 2026-03-20 <span class="flag">--output</span> my_report.png
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="glass-card">
-                <h3>&#128218; 의존성</h3>
-                <div style="margin-top: 12px;">
-                    <div class="tech-item" style="margin-bottom: 8px;">
-                        <div class="tech-name">matplotlib</div>
-                        <div class="tech-desc">차트 렌더링</div>
-                    </div>
-                    <div class="tech-item" style="margin-bottom: 8px;">
-                        <div class="tech-name">Pillow</div>
-                        <div class="tech-desc">이미지 처리</div>
-                    </div>
-                    <div class="tech-item" style="margin-bottom: 8px;">
-                        <div class="tech-name">numpy</div>
-                        <div class="tech-desc">수치 계산</div>
-                    </div>
-                    <div class="tech-item" style="margin-bottom: 8px;">
-                        <div class="tech-name">nicegui</div>
-                        <div class="tech-desc">웹 프레임워크</div>
-                    </div>
-                    <div class="tech-item" style="margin-bottom: 8px;">
-                        <div class="tech-name">google-genai</div>
-                        <div class="tech-desc">Gemini API 클라이언트</div>
-                    </div>
-                    <div class="tech-item">
-                        <div class="tech-name">httpx</div>
-                        <div class="tech-desc">HTTP 클라이언트 (SSL)</div>
-                    </div>
-                </div>
-            </div>
-            <div class="glass-card">
-                <h3>&#128272; 사전 요구사항</h3>
-                <ul style="list-style: none; margin-top: 12px;">
-                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary);">
-                        <strong style="color: var(--text-primary);">Python 3.11+</strong> &mdash; 메인 런타임
-                    </li>
-                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary);">
-                        <strong style="color: var(--text-primary);">Gemini API Key</strong> &mdash; Google AI Studio에서 발급
-                    </li>
-                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary);">
-                        <strong style="color: var(--text-primary);">한글 폰트</strong> &mdash; Malgun Gothic / NanumGothic
-                    </li>
-                    <li style="padding: 8px 0; color: var(--text-secondary);">
-                        <strong style="color: var(--text-primary);">사내망 환경</strong> &mdash; SSL 우회가 자동 설정됨
-                    </li>
-                </ul>
+<span class="comment"># http://localhost:8090 접속 → /ai 페이지에서 일보 분석 시작</span>
             </div>
         </div>
     </div>
@@ -1817,15 +1126,13 @@
 <footer>
     <div class="container">
         <p style="margin-bottom: 8px;">
-            <strong style="color: var(--text-secondary);">Daily Report Agent</strong> &mdash; 물류 수작업일보 AI Agent
+            <strong style="color: var(--text-secondary);">일보 AI 분석 Agent</strong> &mdash; Daily Report AI Analyzer
         </p>
         <p>
             Built with Python + NiceGUI + Gemini 2.0 Flash &nbsp;|&nbsp;
             <a href="https://github.com/donchoru/daily-report-agent" target="_blank">GitHub Repository</a>
         </p>
-        <p style="margin-top: 16px; font-size: 0.75rem;">
-            &copy; 2026 donchoru. PoC Project.
-        </p>
+        <p style="margin-top: 16px; font-size: 0.75rem;">&copy; 2026 donchoru. PoC Project.</p>
     </div>
 </footer>
 

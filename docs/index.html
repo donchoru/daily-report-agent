@@ -567,83 +567,230 @@
             </div>
         </div>
 
-        <!-- 분석 프로세스 -->
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;">AI 분석 프로세스</h3>
-        <div class="process-grid" style="margin-bottom: 32px;">
-            <div class="glass-card process-step">
-                <div class="step-number step-num-blue">1</div>
-                <h4>일보 업로드</h4>
-                <p>웹 브라우저에서 일보 이미지(PNG/JPG)를 드래그 앤 드롭으로 업로드합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-purple">2</div>
-                <h4>AI가 읽고 분석</h4>
-                <p>Gemini Vision OCR &rarr; 핵심이슈 추출 &rarr; 역할별 요약을 자동 실행합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-green">3</div>
-                <h4>인사이트 확인</h4>
-                <p>핵심이슈 3가지, 임원용/실무자용 요약 탭에서 분석 결과를 확인합니다.</p>
-            </div>
-            <div class="glass-card process-step">
-                <div class="step-number step-num-yellow">4</div>
-                <h4>추가 질문</h4>
-                <p>챗봇에서 "TAT 병목은?" "Worst 10 조치 필요한 건?" 등 자유롭게 질문합니다.</p>
-            </div>
-        </div>
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- Mock Screenshot 1: AI 분석 Agent 메인 화면 -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <div class="glass-card" style="margin-bottom:24px; padding:0; overflow:hidden;">
+            <h3 style="padding:24px 32px 0;">&#128187; AI 분석 Agent &mdash; 분석 결과 화면</h3>
+            <p style="padding:0 32px 16px; font-size:0.85rem;">일보 업로드 후 AI가 자동으로 분석한 결과 화면입니다.</p>
 
-        <!-- AI 분석 결과 예시 -->
-        <div class="grid-2">
-            <div class="glass-card">
-                <h3>&#128308; 핵심이슈 추출 결과 (예시)</h3>
-                <div style="margin-top:12px; font-size:0.88rem; color:var(--text-secondary);">
-                    <div style="padding:12px; background:rgba(248,113,113,0.06); border-radius:10px; border-left:3px solid var(--accent-red); margin-bottom:10px;">
-                        <strong style="color:var(--accent-red);">&#128308; [긴급] B동 PHOTO 수동반송율 급증</strong><br>
-                        금일 12.3% (전일 8.7%, +3.6%p 악화). AGV #3 고장 영향 추정.<br>
-                        <span style="color:var(--accent-blue);">&rarr; AGV #3 긴급 복구 + B동 수동반송 인력 증원 필요</span>
+            <!-- Browser Chrome -->
+            <div style="background:#1e293b; border-top:1px solid rgba(255,255,255,0.06);">
+                <!-- Title Bar -->
+                <div style="display:flex; align-items:center; padding:10px 16px; gap:8px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; gap:6px;">
+                        <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                        <div style="width:12px; height:12px; border-radius:50%; background:#fbbf24;"></div>
+                        <div style="width:12px; height:12px; border-radius:50%; background:#22c55e;"></div>
                     </div>
-                    <div style="padding:12px; background:rgba(251,191,36,0.06); border-radius:10px; border-left:3px solid var(--accent-yellow); margin-bottom:10px;">
-                        <strong style="color:var(--accent-yellow);">&#128992; [주의] TAT 대기시간 전일 대비 15분 증가</strong><br>
-                        금일 대기 78.5분 (전일 63.2분). C동 CMP 구간 적체 원인.<br>
-                        <span style="color:var(--accent-blue);">&rarr; C동 CMP 카세트 적체 원인 파악 및 경로 재조정</span>
+                    <div style="flex:1; margin:0 12px;">
+                        <div style="background:rgba(255,255,255,0.06); border-radius:6px; padding:5px 14px; font-size:0.72rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">
+                            localhost:8090/ai
+                        </div>
                     </div>
-                    <div style="padding:12px; background:rgba(52,211,153,0.06); border-radius:10px; border-left:3px solid var(--accent-green);">
-                        <strong style="color:var(--accent-green);">&#128994; [양호] 월간 목표 달성률 95.2% 유지</strong><br>
-                        3월 일평균 수작업 482건 (목표 507건). 전월 대비 2.1%p 개선.<br>
-                        <span style="color:var(--accent-blue);">&rarr; 현 추세 유지 시 월말 목표 달성 가능</span>
+                </div>
+
+                <!-- App Content -->
+                <div style="background:#070b14; padding:28px 32px; min-height:200px;">
+                    <!-- Hero Header Mini -->
+                    <div style="background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(139,92,246,0.08)); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:24px; text-align:center; margin-bottom:24px;">
+                        <div style="display:inline-flex; align-items:center; gap:6px; margin-bottom:8px;">
+                            <div style="width:6px; height:6px; border-radius:50%; background:#34d399;"></div>
+                            <span style="font-family:'JetBrains Mono'; font-size:0.6rem; font-weight:600; letter-spacing:0.15em; color:#34d399;">AI AGENT</span>
+                        </div>
+                        <div style="font-size:1.6rem; font-weight:900; background:linear-gradient(135deg,#fff,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px;">일보 AI 분석 Agent</div>
+                        <div style="font-size:0.65rem; letter-spacing:0.2em; color:var(--text-muted); text-transform:uppercase;">Daily Report AI Analysis &amp; Chat Agent</div>
+                        <div style="display:flex; justify-content:center; gap:8px; margin-top:12px;">
+                            <span style="padding:4px 10px; border-radius:100px; font-size:0.6rem; font-weight:500; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-muted);">&#128269; OCR 추출</span>
+                            <span style="padding:4px 10px; border-radius:100px; font-size:0.6rem; font-weight:500; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-muted);">&#129504; AI 분석</span>
+                            <span style="padding:4px 10px; border-radius:100px; font-size:0.6rem; font-weight:500; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-muted);">&#128172; 대화형 Q&A</span>
+                        </div>
+                    </div>
+
+                    <!-- 핵심이슈 분석 Card -->
+                    <div style="background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:20px; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                            <div style="width:3px; height:18px; border-radius:2px; background:linear-gradient(180deg,#60a5fa,#a78bfa);"></div>
+                            <span style="font-size:0.95rem; font-weight:700;">AI 핵심이슈 분석</span>
+                        </div>
+
+                        <div style="padding:12px 14px; background:rgba(248,113,113,0.06); border-radius:12px; border-left:3px solid var(--accent-red); margin-bottom:10px;">
+                            <strong style="color:var(--accent-red); font-size:0.82rem;">&#128308; [긴급] B동 PHOTO 수동반송율 급증</strong><br>
+                            <span style="font-size:0.78rem; color:var(--text-secondary);">금일 12.3% / 전일 8.7% (+3.6%p 악화). AGV #3 고장 영향 추정.</span><br>
+                            <span style="font-size:0.78rem; color:var(--accent-blue);">&rarr; AGV #3 긴급 복구 + B동 수동반송 인력 증원 필요</span>
+                        </div>
+                        <div style="padding:12px 14px; background:rgba(251,191,36,0.06); border-radius:12px; border-left:3px solid var(--accent-yellow); margin-bottom:10px;">
+                            <strong style="color:var(--accent-yellow); font-size:0.82rem;">&#128992; [주의] TAT 대기시간 전일 대비 15분 증가</strong><br>
+                            <span style="font-size:0.78rem; color:var(--text-secondary);">금일 대기 78.5분 (전일 63.2분). C동 CMP 구간 적체 원인.</span><br>
+                            <span style="font-size:0.78rem; color:var(--accent-blue);">&rarr; C동 CMP 카세트 적체 원인 파악 및 경로 재조정</span>
+                        </div>
+                        <div style="padding:12px 14px; background:rgba(52,211,153,0.06); border-radius:12px; border-left:3px solid var(--accent-green);">
+                            <strong style="color:var(--accent-green); font-size:0.82rem;">&#128994; [양호] 월간 목표 달성률 95.2% 유지</strong><br>
+                            <span style="font-size:0.78rem; color:var(--text-secondary);">3월 일평균 수작업 482건 (목표 507건). 전월 대비 2.1%p 개선.</span><br>
+                            <span style="font-size:0.78rem; color:var(--accent-blue);">&rarr; 현 추세 유지 시 월말 목표 달성 가능</span>
+                        </div>
+                    </div>
+
+                    <!-- 역할별 요약 Card -->
+                    <div style="background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:20px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                            <div style="width:3px; height:18px; border-radius:2px; background:linear-gradient(180deg,#60a5fa,#a78bfa);"></div>
+                            <span style="font-size:0.95rem; font-weight:700;">역할별 맞춤 요약</span>
+                        </div>
+                        <!-- Tabs -->
+                        <div style="display:flex; gap:0; margin-bottom:14px;">
+                            <div style="padding:8px 20px; background:rgba(96,165,250,0.15); border:1px solid rgba(96,165,250,0.3); border-radius:8px 8px 0 0; font-size:0.78rem; font-weight:600; color:var(--accent-blue);">&#128188; 임원용</div>
+                            <div style="padding:8px 20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px 8px 0 0; font-size:0.78rem; font-weight:500; color:var(--text-muted); margin-left:-1px;">&#128736; 실무자용</div>
+                        </div>
+                        <!-- Tab Content -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:0 8px 8px 8px; padding:16px; font-size:0.78rem; color:var(--text-secondary); line-height:1.8;">
+                            <strong style="color:var(--text-primary); font-size:0.85rem;">&#128202; 일간 현황 요약</strong><br><br>
+                            <table style="width:100%; font-size:0.75rem; border-collapse:collapse;">
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                                    <td style="padding:6px 8px; color:var(--text-muted);">지표</td>
+                                    <td style="padding:6px 8px; color:var(--text-muted);">금일</td>
+                                    <td style="padding:6px 8px; color:var(--text-muted);">전일</td>
+                                    <td style="padding:6px 8px; color:var(--text-muted);">증감</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                                    <td style="padding:6px 8px;">수작업건수</td>
+                                    <td style="padding:6px 8px;">482건</td>
+                                    <td style="padding:6px 8px;">501건</td>
+                                    <td style="padding:6px 8px; color:var(--accent-green);">&#128994; -19건</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                                    <td style="padding:6px 8px;">수동반송율</td>
+                                    <td style="padding:6px 8px;">12.3%</td>
+                                    <td style="padding:6px 8px;">8.7%</td>
+                                    <td style="padding:6px 8px; color:var(--accent-red);">&#128308; +3.6%p</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                                    <td style="padding:6px 8px;">TAT합계</td>
+                                    <td style="padding:6px 8px;">178.5분</td>
+                                    <td style="padding:6px 8px;">163.2분</td>
+                                    <td style="padding:6px 8px; color:var(--accent-red);">&#128308; +15.3분</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 8px;">달성률</td>
+                                    <td style="padding:6px 8px;">95.2%</td>
+                                    <td style="padding:6px 8px;">93.1%</td>
+                                    <td style="padding:6px 8px; color:var(--accent-green);">&#128994; +2.1%p</td>
+                                </tr>
+                            </table>
+                            <br>
+                            <strong style="color:var(--accent-red);">&#9888; 악화 알림:</strong> 수동반송율 3.6%p 악화, TAT 15.3분 증가 &mdash; B동 PHOTO 집중 모니터링 필요
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="glass-card">
-                <h3>&#128172; 대화형 Q&A (예시)</h3>
-                <div style="margin-top:12px; font-size:0.88rem;">
-                    <!-- User -->
-                    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-                        <div style="padding:10px 14px; border-radius:14px 14px 2px 14px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:70%; font-size:0.85rem;">
-                            오늘 가장 큰 이슈가 뭐야?
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- Mock Screenshot 2: 대화형 챗봇 화면 -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <div class="glass-card" style="padding:0; overflow:hidden;">
+            <h3 style="padding:24px 32px 0;">&#128172; AI 챗봇 &mdash; 대화형 Q&A 화면</h3>
+            <p style="padding:0 32px 16px; font-size:0.85rem;">일보 데이터를 기반으로 자유롭게 질문하고, AI가 즉시 답변합니다.</p>
+
+            <!-- Browser Chrome -->
+            <div style="background:#1e293b; border-top:1px solid rgba(255,255,255,0.06);">
+                <div style="display:flex; align-items:center; padding:10px 16px; gap:8px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; gap:6px;">
+                        <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                        <div style="width:12px; height:12px; border-radius:50%; background:#fbbf24;"></div>
+                        <div style="width:12px; height:12px; border-radius:50%; background:#22c55e;"></div>
+                    </div>
+                    <div style="flex:1; margin:0 12px;">
+                        <div style="background:rgba(255,255,255,0.06); border-radius:6px; padding:5px 14px; font-size:0.72rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">
+                            localhost:8090/ai
                         </div>
                     </div>
-                    <!-- AI -->
-                    <div style="display:flex; justify-content:flex-start; margin-bottom:14px;">
-                        <div style="padding:10px 14px; border-radius:14px 14px 14px 2px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:80%; font-size:0.85rem; color:var(--text-secondary);">
-                            가장 큰 이슈는 <strong style="color:var(--accent-red);">B동 PHOTO 수동반송율 12.3%</strong>입니다.
-                            전일 8.7% 대비 3.6%p 악화되었으며, AGV #3 고장(30분 다운타임)이 주 원인으로 보입니다.
+                </div>
+
+                <!-- Chat App Content -->
+                <div style="background:#070b14; padding:28px 32px;">
+                    <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:20px;">
+                        <!-- Chat Header -->
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                            <span style="color:var(--accent-blue); font-size:1.1rem;">&#128172;</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="width:3px; height:18px; border-radius:2px; background:linear-gradient(180deg,#60a5fa,#a78bfa);"></div>
+                                <span style="font-size:0.95rem; font-weight:700;">일보 AI 챗봇</span>
+                            </div>
+                            <span style="font-size:0.75rem; color:var(--text-muted); margin-left:4px;">일보 데이터를 기반으로 질문하세요</span>
                         </div>
-                    </div>
-                    <!-- User -->
-                    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-                        <div style="padding:10px 14px; border-radius:14px 14px 2px 14px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:70%; font-size:0.85rem;">
-                            Worst 10 중 즉시 조치가 필요한 건?
+
+                        <!-- Chat Messages -->
+                        <div style="max-height:400px; padding:8px; margin-bottom:12px;">
+                            <!-- User -->
+                            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                                <div style="padding:10px 16px; border-radius:16px 16px 4px 16px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:65%; font-size:0.82rem;">
+                                    오늘 가장 큰 이슈가 뭐야?
+                                </div>
+                            </div>
+                            <!-- AI -->
+                            <div style="display:flex; justify-content:flex-start; margin-bottom:16px;">
+                                <div style="padding:12px 16px; border-radius:16px 16px 16px 4px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:75%; font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+                                    가장 큰 이슈는 <strong style="color:var(--accent-red);">B동 PHOTO 수동반송율 12.3%</strong>입니다.<br><br>
+                                    전일 8.7% 대비 <strong style="color:var(--text-primary);">3.6%p 악화</strong>되었으며, AGV #3 고장(30분 다운타임)이 주 원인으로 보입니다.
+                                    B동 수동반송 인력을 증원하고, AGV #3 긴급 복구를 진행하는 것이 좋겠습니다.
+                                </div>
+                            </div>
+                            <!-- User -->
+                            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                                <div style="padding:10px 16px; border-radius:16px 16px 4px 16px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:65%; font-size:0.82rem;">
+                                    TAT 병목 구간은 어디야?
+                                </div>
+                            </div>
+                            <!-- AI -->
+                            <div style="display:flex; justify-content:flex-start; margin-bottom:16px;">
+                                <div style="padding:12px 16px; border-radius:16px 16px 16px 4px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:75%; font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+                                    TAT 병목은 <strong style="color:var(--accent-red);">대기(Waiting)</strong> 구간입니다.<br><br>
+                                    &bull; 대기: <strong style="color:var(--text-primary);">78.5분</strong> (전일 63.2분, +15.3분)<br>
+                                    &bull; 가공: 42.1분 (전일 40.8분, +1.3분)<br>
+                                    &bull; 운반: 31.2분 (전일 30.5분, +0.7분)<br><br>
+                                    C동 CMP 구간에서 카세트 적체가 발생하여 대기시간이 급증했습니다.
+                                    경로 재조정을 권장합니다.
+                                </div>
+                            </div>
+                            <!-- User -->
+                            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                                <div style="padding:10px 16px; border-radius:16px 16px 4px 16px; background:linear-gradient(135deg, #3b82f6, #7c3aed); color:white; max-width:65%; font-size:0.82rem;">
+                                    Worst 10 중 즉시 조치가 필요한 건?
+                                </div>
+                            </div>
+                            <!-- AI -->
+                            <div style="display:flex; justify-content:flex-start;">
+                                <div style="padding:12px 16px; border-radius:16px 16px 16px 4px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:75%; font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+                                    Worst Top 3 중 즉시 조치가 필요한 건:<br><br>
+                                    <strong style="color:var(--accent-red);">1위: B동-PHOTO</strong> &mdash; 금일 98건, 전일 52건 (+46건)<br>
+                                    <strong style="color:var(--accent-yellow);">2위: C동-CMP</strong> &mdash; 금일 87건, 전일 61건 (+26건)<br><br>
+                                    두 건 모두 설비 이슈(AGV #3 고장, 카세트 적체)와 연관되어 있으므로
+                                    <strong style="color:var(--text-primary);">설비팀 긴급 협조</strong>가 필요합니다.
+                                    3위 D동-ETCH는 +12건으로 추이 모니터링이 적절합니다.
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <!-- AI -->
-                    <div style="display:flex; justify-content:flex-start;">
-                        <div style="padding:10px 14px; border-radius:14px 14px 14px 2px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); max-width:80%; font-size:0.85rem; color:var(--text-secondary);">
-                            Worst 1~3위 중 즉시 조치 필요한 건:<br>
-                            <strong style="color:var(--text-primary);">1위: B동-PHOTO</strong> (금일 98건, 전일 52건, +46건)<br>
-                            <strong style="color:var(--text-primary);">2위: C동-CMP</strong> (금일 87건, 전일 61건, +26건)<br>
-                            두 건 모두 설비 이슈와 연관되어 설비팀 협조가 필요합니다.
+
+                        <!-- Suggested Questions -->
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+                            <span style="padding:5px 12px; border-radius:100px; font-size:0.7rem; font-weight:500; background:rgba(96,165,250,0.1); color:var(--accent-blue); border:1px solid rgba(96,165,250,0.2);">오늘 가장 큰 이슈가 뭐야?</span>
+                            <span style="padding:5px 12px; border-radius:100px; font-size:0.7rem; font-weight:500; background:rgba(96,165,250,0.1); color:var(--accent-blue); border:1px solid rgba(96,165,250,0.2);">TAT 병목 구간은 어디야?</span>
+                            <span style="padding:5px 12px; border-radius:100px; font-size:0.7rem; font-weight:500; background:rgba(96,165,250,0.1); color:var(--accent-blue); border:1px solid rgba(96,165,250,0.2);">Worst 10 중 즉시 조치가 필요한 건?</span>
+                            <span style="padding:5px 12px; border-radius:100px; font-size:0.7rem; font-weight:500; background:rgba(96,165,250,0.1); color:var(--accent-blue); border:1px solid rgba(96,165,250,0.2);">수동반송율 추이는 어때?</span>
+                        </div>
+
+                        <!-- Divider -->
+                        <div style="height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent); margin-bottom:12px;"></div>
+
+                        <!-- Input -->
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px 16px; font-size:0.8rem; color:var(--text-muted);">
+                                질문을 입력하세요...
+                            </div>
+                            <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#3b82f6,#7c3aed); display:flex; align-items:center; justify-content:center; font-size:1rem; color:white; flex-shrink:0;">
+                                &#10148;
+                            </div>
                         </div>
                     </div>
                 </div>

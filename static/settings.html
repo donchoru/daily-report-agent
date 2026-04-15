@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>설정 — DRA 제조 일보 AI</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:#0a0a0f;color:#e4e4e7;min-height:100vh}
+
+  /* ── Nav ── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;
+    background:rgba(24,24,32,.85);backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(255,255,255,.06)}
+  nav .inner{max-width:1280px;margin:0 auto;padding:0 24px;height:56px;
+    display:flex;align-items:center;justify-content:space-between}
+  nav .logo{font-size:18px;font-weight:700;text-decoration:none}
+  nav .logo .gradient{background:linear-gradient(135deg,#818cf8,#6366f1);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  nav .logo .sub{color:#a1a1aa;font-size:13px;font-weight:400;margin-left:8px}
+  nav .links{display:flex;gap:4px}
+  nav .links a{padding:6px 12px;border-radius:8px;font-size:14px;
+    text-decoration:none;color:#a1a1aa;transition:all .15s}
+  nav .links a:hover{color:#e4e4e7;background:rgba(255,255,255,.05)}
+  nav .links a.active{color:#a5b4fc;background:rgba(99,102,241,.15)}
+
+  /* ── Main ── */
+  main{max-width:640px;margin:0 auto;padding:88px 16px 40px}
+
+  h1{font-size:24px;font-weight:700;margin-bottom:4px}
+  .desc{color:#a1a1aa;font-size:14px;margin-bottom:32px}
+
+  /* ── Glass Card ── */
+  .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;padding:24px;margin-bottom:24px}
+  .card h2{font-size:16px;font-weight:600;margin-bottom:16px;color:#c4b5fd}
+
+  /* ── Form ── */
+  label{display:block;font-size:13px;color:#a1a1aa;margin-bottom:6px}
+  input[type="text"],input[type="password"]{
+    width:100%;padding:10px 12px;border-radius:8px;font-size:14px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    color:#e4e4e7;outline:none;transition:border-color .15s}
+  input:focus{border-color:#6366f1}
+  .field{margin-bottom:16px}
+
+  /* ── Presets ── */
+  .presets{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .presets button{padding:6px 14px;border-radius:8px;font-size:13px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    color:#a1a1aa;cursor:pointer;transition:all .15s}
+  .presets button:hover{background:rgba(99,102,241,.15);color:#a5b4fc;
+    border-color:rgba(99,102,241,.3)}
+
+  /* ── Buttons ── */
+  .actions{display:flex;gap:12px;margin-top:24px}
+  .btn{padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;
+    cursor:pointer;border:none;transition:all .15s}
+  .btn-primary{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff}
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-secondary{background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);color:#e4e4e7}
+  .btn-secondary:hover{background:rgba(255,255,255,.08)}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* ── Result ── */
+  .result{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13px;
+    line-height:1.6;display:none}
+  .result.ok{display:block;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86efac}
+  .result.err{display:block;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+  .result.info{display:block;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);color:#a5b4fc}
+
+  /* ── Spinner ── */
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);
+    border-top-color:#818cf8;border-radius:50%;animation:spin .6s linear infinite;
+    vertical-align:middle;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="inner">
+    <a href="/web/" class="logo">
+      <span class="gradient">DRA</span>
+      <span class="sub">제조 일보 AI</span>
+    </a>
+    <div class="links">
+      <a href="/web/">대시보드</a>
+      <a href="/web/timeline">타임라인</a>
+      <a href="/web/compare">비교 분석</a>
+      <a href="/web/settings" class="active">설정</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Main -->
+<main>
+  <h1>LLM 설정</h1>
+  <p class="desc">AI 분석에 사용할 LLM 연결 정보를 설정합니다. 저장 즉시 반영됩니다.</p>
+
+  <!-- Presets -->
+  <div class="card">
+    <h2>프리셋</h2>
+    <div class="presets">
+      <button onclick="applyPreset('gemini')">Gemini</button>
+      <button onclick="applyPreset('ollama')">Ollama (로컬)</button>
+      <button onclick="applyPreset('openai')">OpenAI</button>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="card">
+    <h2>연결 정보</h2>
+    <div class="field">
+      <label for="base-url">Base URL</label>
+      <input type="text" id="base-url" placeholder="https://api.openai.com/v1/"/>
+    </div>
+    <div class="field">
+      <label for="api-key">API Key</label>
+      <input type="password" id="api-key" placeholder="sk-... 또는 Gemini API key"/>
+    </div>
+    <div class="field">
+      <label for="model">Model</label>
+      <input type="text" id="model" placeholder="gpt-4o, gemini-2.0-flash, ..."/>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-save" onclick="saveSettings()">저장</button>
+      <button class="btn btn-secondary" id="btn-test" onclick="testConnection()">연결 테스트</button>
+    </div>
+
+    <div class="result" id="result"></div>
+  </div>
+</main>
+
+<script>
+const PRESETS = {
+  gemini: {
+    url: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+    model: 'gemini-2.0-flash',
+  },
+  ollama: {
+    url: 'http://localhost:11434/v1/',
+    model: 'qwen2.5:14b',
+  },
+  openai: {
+    url: 'https://api.openai.com/v1/',
+    model: 'gpt-4o',
+  },
+};
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  document.getElementById('base-url').value = p.url;
+  document.getElementById('model').value = p.model;
+  document.getElementById('api-key').value = '';
+  document.getElementById('api-key').focus();
+  showResult('info', `${name} 프리셋 적용됨 — API Key를 입력하세요` + (name === 'ollama' ? ' (Ollama는 키 불필요 — "ollama" 입력)' : ''));
+}
+
+function showResult(type, msg) {
+  const el = document.getElementById('result');
+  el.className = 'result ' + type;
+  el.textContent = msg;
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>저장 중…';
+  try {
+    const body = {};
+    const url = document.getElementById('base-url').value.trim();
+    const key = document.getElementById('api-key').value.trim();
+    const model = document.getElementById('model').value.trim();
+    if (url) body.llm_base_url = url;
+    if (key) body.llm_api_key = key;
+    if (model) body.llm_model = model;
+
+    const resp = await fetch('/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      showResult('ok', '설정이 저장되었습니다. 서버 재시작 없이 즉시 반영됩니다.');
+      loadCurrent();
+    } else {
+      showResult('err', data.detail || '저장 실패');
+    }
+  } catch (e) {
+    showResult('err', '서버 연결 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '저장';
+  }
+}
+
+async function testConnection() {
+  const btn = document.getElementById('btn-test');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>테스트 중…';
+  try {
+    const resp = await fetch('/settings/test', { method: 'POST' });
+    const data = await resp.json();
+    if (data.status === 'ok') {
+      showResult('ok', `연결 성공! [${data.model}]\n응답: ${data.reply}`);
+    } else {
+      showResult('err', `연결 실패: ${data.message}`);
+    }
+  } catch (e) {
+    showResult('err', '서버 연결 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '연결 테스트';
+  }
+}
+
+async function loadCurrent() {
+  try {
+    const resp = await fetch('/settings');
+    const data = await resp.json();
+    document.getElementById('base-url').placeholder = data.llm_base_url || '';
+    document.getElementById('api-key').placeholder = `현재: ${data.llm_api_key_masked}`;
+    document.getElementById('model').placeholder = data.llm_model || '';
+  } catch (e) { /* ignore */ }
+}
+
+loadCurrent();
+</script>
+</body>
+</html>

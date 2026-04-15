@@ -32,8 +32,11 @@ from analyzer.insights import (
     generate_insights,
     reanalyze_with_perspective,
 )
+from analyzer.llm import reset_client
+import config
 from config import (
     ALLOWED_MIME_TYPES, BUNDLE_DIR, LOGS_DIR, MAX_COMPARE_IMAGES, MAX_IMAGE_SIZE,
+    load_settings_from_db,
 )
 from db import Database
 from models import AnalysisResponse, CompareResponse, HistoryItem
@@ -61,7 +64,8 @@ db = Database()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db.open()
-    logger.info("DB initialized")
+    await load_settings_from_db(db)
+    logger.info("DB initialized (settings loaded)")
     yield
     await db.close()
     logger.info("Shutdown complete")
@@ -695,6 +699,63 @@ async def seed_demo(req: SeedRequest | None = None):
     return {"message": f"{len(ids)}건 시딩 완료", "ids": ids}
 
 
+# ── 설정 (Settings) API ──────────────────────────────────────
+
+
+class SettingsRequest(BaseModel):
+    llm_base_url: str | None = None
+    llm_api_key: str | None = None
+    llm_model: str | None = None
+
+
+@app.get("/settings")
+async def get_settings():
+    """현재 LLM 설정 반환 (API 키는 마스킹)."""
+    key = config.LLM_API_KEY
+    masked = key[:4] + "***" + key[-4:] if len(key) > 8 else "***"
+    return {
+        "llm_base_url": config.LLM_BASE_URL,
+        "llm_api_key_masked": masked,
+        "llm_model": config.LLM_MODEL,
+    }
+
+
+@app.post("/settings")
+async def save_settings(req: SettingsRequest):
+    """설정 저장 → DB 기록 + config 갱신 + LLM client 리셋."""
+    if req.llm_base_url is not None:
+        await db.set_setting("llm_base_url", req.llm_base_url)
+        config.LLM_BASE_URL = req.llm_base_url
+    if req.llm_api_key is not None:
+        await db.set_setting("llm_api_key", req.llm_api_key)
+        config.LLM_API_KEY = req.llm_api_key
+    if req.llm_model is not None:
+        await db.set_setting("llm_model", req.llm_model)
+        config.LLM_MODEL = req.llm_model
+    reset_client()
+    logger.info("LLM 설정 변경 완료")
+    return {"status": "ok", "message": "설정이 저장되었습니다"}
+
+
+@app.post("/settings/test")
+async def test_settings():
+    """간단한 LLM 호출로 연결 테스트."""
+    from analyzer.llm import get_client
+    try:
+        client = get_client()
+        resp = await client.chat.completions.create(
+            model=config.LLM_MODEL,
+            messages=[{"role": "user", "content": "안녕하세요. 한 문장으로 답해주세요."}],
+            max_tokens=100,
+            temperature=0.1,
+        )
+        reply = resp.choices[0].message.content.strip()
+        return {"status": "ok", "model": config.LLM_MODEL, "reply": reply}
+    except Exception as e:
+        logger.warning("LLM 연결 테스트 실패: %s", e)
+        return {"status": "error", "message": str(e)}
+
+
 # ── 프론트엔드 정적 파일 서빙 (/web) ─────────────────────────
 # npm/Node.js 없이 python main.py 만으로 프론트+백엔드 동시 서빙
 
@@ -727,6 +788,11 @@ async def _web_compare():
     return FileResponse(_STATIC_DIR / "compare.html") if _STATIC_DIR.exists() else HTTPException(404)
 
 
+@app.get("/web/settings")
+async def _web_settings():
+    return FileResponse(_STATIC_DIR / "settings.html") if _STATIC_DIR.exists() else HTTPException(404)
+
+
 # JS/CSS 에셋
 if _STATIC_DIR.exists() and (_STATIC_DIR / "_next").exists():
     app.mount(
@@ -740,5 +806,16 @@ if _STATIC_DIR.exists() and (_STATIC_DIR / "_next").exists():
 # ── 메인 ──────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    import threading
+    import webbrowser
+
     import uvicorn
+
+    def _open_browser():
+        """서버 시작 후 브라우저 오픈."""
+        import time
+        time.sleep(1.5)
+        webbrowser.open("http://localhost:8700/web/")
+
+    threading.Thread(target=_open_browser, daemon=True).start()
     uvicorn.run(app, host="0.0.0.0", port=8700)

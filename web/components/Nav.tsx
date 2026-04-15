@@ -39,6 +39,12 @@ export default function Nav() {
               </Link>
             );
           })}
+          <a
+            href="/web/settings"
+            className="px-3 py-1.5 rounded-lg text-sm transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+          >
+            설정
+          </a>
         </div>
       </div>
     </nav>

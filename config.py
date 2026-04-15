@@ -127,3 +127,17 @@ DRILLDOWN_LINKS: dict[str, list[dict]] = {
 
 # 드릴다운 베이스 URL (프론트엔드 기준 — 실제 환경에 맞게 수정)
 DRILLDOWN_BASE_URL: str = os.environ.get("DRILLDOWN_BASE_URL", "")
+
+
+# ── DB에서 설정 로드 ──────────────────────────────────────────────
+
+async def load_settings_from_db(db) -> None:
+    """DB settings 테이블에서 LLM 설정을 로드하여 모듈 변수에 반영."""
+    global LLM_BASE_URL, LLM_API_KEY, LLM_MODEL
+    settings = await db.get_all_settings()
+    if "llm_base_url" in settings:
+        LLM_BASE_URL = settings["llm_base_url"]
+    if "llm_api_key" in settings:
+        LLM_API_KEY = settings["llm_api_key"]
+    if "llm_model" in settings:
+        LLM_MODEL = settings["llm_model"]

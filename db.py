@@ -69,6 +69,12 @@ CREATE TABLE IF NOT EXISTS interests (
     active INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now','localtime'))
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT DEFAULT (datetime('now','localtime'))
+);
 """
 
 
@@ -392,6 +398,30 @@ class Database:
         )
         await self._db.commit()
         return cur.rowcount > 0
+
+    # ── 설정 (Settings) ────────────────────────────────────────
+
+    async def get_setting(self, key: str) -> str | None:
+        cur = await self._db.execute(
+            "SELECT value FROM settings WHERE key = ?", (key,)
+        )
+        row = await cur.fetchone()
+        return row["value"] if row else None
+
+    async def set_setting(self, key: str, value: str) -> None:
+        await self._db.execute(
+            """INSERT INTO settings (key, value, updated_at)
+               VALUES (?, ?, datetime('now','localtime'))
+               ON CONFLICT(key) DO UPDATE SET value = excluded.value,
+               updated_at = datetime('now','localtime')""",
+            (key, value),
+        )
+        await self._db.commit()
+
+    async def get_all_settings(self) -> dict[str, str]:
+        cur = await self._db.execute("SELECT key, value FROM settings")
+        rows = await cur.fetchall()
+        return {r["key"]: r["value"] for r in rows}
 
     # ── 분석 업데이트 (재분석 결과 저장) ──────────────────────
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from openai import AsyncOpenAI
 
-from config import LLM_BASE_URL, LLM_API_KEY
+import config
 
 _client: AsyncOpenAI | None = None
 
@@ -12,5 +12,11 @@ _client: AsyncOpenAI | None = None
 def get_client() -> AsyncOpenAI:
     global _client
     if not _client:
-        _client = AsyncOpenAI(base_url=LLM_BASE_URL, api_key=LLM_API_KEY)
+        _client = AsyncOpenAI(base_url=config.LLM_BASE_URL, api_key=config.LLM_API_KEY)
     return _client
+
+
+def reset_client() -> None:
+    """설정 변경 시 기존 클라이언트 폐기 — 다음 get_client() 호출 시 재생성."""
+    global _client
+    _client = None

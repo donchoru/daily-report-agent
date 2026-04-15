@@ -740,12 +740,18 @@ async def save_settings(req: SettingsRequest):
 @app.post("/settings/test")
 async def test_settings(req: SettingsRequest | None = None):
     """폼에 입력한 값으로 직접 LLM 연결 테스트 (저장 불필요)."""
+    import httpx
     from openai import AsyncOpenAI
     base_url = (req.llm_base_url if req and req.llm_base_url else None) or config.LLM_BASE_URL
     api_key = (req.llm_api_key if req and req.llm_api_key else None) or config.LLM_API_KEY
     model = (req.llm_model if req and req.llm_model else None) or config.LLM_MODEL
     try:
-        client = AsyncOpenAI(base_url=base_url, api_key=api_key)
+        client = AsyncOpenAI(
+            base_url=base_url,
+            api_key=api_key,
+            max_retries=0,
+            timeout=httpx.Timeout(30.0, connect=10.0),
+        )
         resp = await client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": "안녕하세요. 한 문장으로 답해주세요."}],
@@ -755,8 +761,18 @@ async def test_settings(req: SettingsRequest | None = None):
         reply = resp.choices[0].message.content.strip()
         return {"status": "ok", "model": model, "reply": reply}
     except Exception as e:
-        logger.warning("LLM 연결 테스트 실패: %s", e)
-        return {"status": "error", "message": str(e)}
+        err_type = type(e).__name__
+        logger.warning("LLM 연결 테스트 실패 [%s]: %s", err_type, e)
+        # 사용자에게 유용한 힌트 추가
+        hint = ""
+        err_msg = str(e).lower()
+        if "connection" in err_msg or "connect" in err_msg:
+            hint = f" (서버 {base_url} 에 연결할 수 없습니다. IP/포트를 확인하세요)"
+        elif "timeout" in err_msg:
+            hint = " (서버 응답 시간 초과)"
+        elif "401" in err_msg or "auth" in err_msg:
+            hint = " (API 키가 잘못되었습니다)"
+        return {"status": "error", "message": f"[{err_type}] {e}{hint}"}
 
 
 # ── 프론트엔드 정적 파일 서빙 (/web) ─────────────────────────

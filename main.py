@@ -738,19 +738,22 @@ async def save_settings(req: SettingsRequest):
 
 
 @app.post("/settings/test")
-async def test_settings():
-    """간단한 LLM 호출로 연결 테스트."""
-    from analyzer.llm import get_client
+async def test_settings(req: SettingsRequest | None = None):
+    """폼에 입력한 값으로 직접 LLM 연결 테스트 (저장 불필요)."""
+    from openai import AsyncOpenAI
+    base_url = (req.llm_base_url if req and req.llm_base_url else None) or config.LLM_BASE_URL
+    api_key = (req.llm_api_key if req and req.llm_api_key else None) or config.LLM_API_KEY
+    model = (req.llm_model if req and req.llm_model else None) or config.LLM_MODEL
     try:
-        client = get_client()
+        client = AsyncOpenAI(base_url=base_url, api_key=api_key)
         resp = await client.chat.completions.create(
-            model=config.LLM_MODEL,
+            model=model,
             messages=[{"role": "user", "content": "안녕하세요. 한 문장으로 답해주세요."}],
             max_tokens=100,
             temperature=0.1,
         )
         reply = resp.choices[0].message.content.strip()
-        return {"status": "ok", "model": config.LLM_MODEL, "reply": reply}
+        return {"status": "ok", "model": model, "reply": reply}
     except Exception as e:
         logger.warning("LLM 연결 테스트 실패: %s", e)
         return {"status": "error", "message": str(e)}

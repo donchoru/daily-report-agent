@@ -206,7 +206,18 @@ async function testConnection() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>테스트 중…';
   try {
-    const resp = await fetch('/settings/test', { method: 'POST' });
+    const body = {};
+    const url = document.getElementById('base-url').value.trim();
+    const key = document.getElementById('api-key').value.trim();
+    const model = document.getElementById('model').value.trim();
+    if (url) body.llm_base_url = url;
+    if (key) body.llm_api_key = key;
+    if (model) body.llm_model = model;
+    const resp = await fetch('/settings/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
     const data = await resp.json();
     if (data.status === 'ok') {
       showResult('ok', `연결 성공! [${data.model}]\n응답: ${data.reply}`);

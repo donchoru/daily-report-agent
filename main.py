@@ -32,7 +32,9 @@ from analyzer.insights import (
     generate_insights,
     reanalyze_with_perspective,
 )
-from config import ALLOWED_MIME_TYPES, MAX_COMPARE_IMAGES, MAX_IMAGE_SIZE
+from config import (
+    ALLOWED_MIME_TYPES, BUNDLE_DIR, LOGS_DIR, MAX_COMPARE_IMAGES, MAX_IMAGE_SIZE,
+)
 from db import Database
 from models import AnalysisResponse, CompareResponse, HistoryItem
 
@@ -44,7 +46,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("logs/report.log", encoding="utf-8"),
+        logging.FileHandler(str(LOGS_DIR / "report.log"), encoding="utf-8"),
     ],
 )
 logger = logging.getLogger("daily-report")
@@ -696,7 +698,7 @@ async def seed_demo(req: SeedRequest | None = None):
 # ── 프론트엔드 정적 파일 서빙 (/web) ─────────────────────────
 # npm/Node.js 없이 python main.py 만으로 프론트+백엔드 동시 서빙
 
-_STATIC_DIR = Path(__file__).resolve().parent / "static"
+_STATIC_DIR = BUNDLE_DIR / "static"
 
 # HTML 페이지 라우트
 

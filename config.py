@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -32,10 +33,18 @@ GEMINI_API_KEY: str = (
 )
 
 # ── 경로 ───────────────────────────────────────────────────────
+# PyInstaller 번들: 정적 파일은 _MEIPASS, DB/로그는 실행파일 옆
 
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "report.db"
-LOGS_DIR = BASE_DIR / "logs"
+if getattr(sys, "frozen", False):
+    BUNDLE_DIR = Path(sys._MEIPASS)              # 번들된 데이터 (static, analyzer 등)
+    RUNTIME_DIR = Path(sys.executable).parent     # DB, 로그 저장 위치
+else:
+    BUNDLE_DIR = Path(__file__).resolve().parent
+    RUNTIME_DIR = BUNDLE_DIR
+
+BASE_DIR = BUNDLE_DIR  # 하위 호환
+DB_PATH = RUNTIME_DIR / "report.db"
+LOGS_DIR = RUNTIME_DIR / "logs"
 
 LOGS_DIR.mkdir(exist_ok=True)
 

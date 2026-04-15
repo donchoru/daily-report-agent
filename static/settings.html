@@ -105,6 +105,7 @@
   <div class="card">
     <h2>프리셋</h2>
     <div class="presets">
+      <button onclick="applyPreset('flopi')">FLOPI (사내)</button>
       <button onclick="applyPreset('gemini')">Gemini</button>
       <button onclick="applyPreset('ollama')">Ollama (로컬)</button>
       <button onclick="applyPreset('openai')">OpenAI</button>
@@ -138,12 +139,18 @@
 
 <script>
 const PRESETS = {
+  flopi: {
+    url: 'http://localhost:8600/v1/',
+    key: 'none',
+    model: 'flopi',
+  },
   gemini: {
     url: 'https://generativelanguage.googleapis.com/v1beta/openai/',
     model: 'gemini-2.0-flash',
   },
   ollama: {
     url: 'http://localhost:11434/v1/',
+    key: 'ollama',
     model: 'qwen2.5:14b',
   },
   openai: {
@@ -157,9 +164,14 @@ function applyPreset(name) {
   if (!p) return;
   document.getElementById('base-url').value = p.url;
   document.getElementById('model').value = p.model;
-  document.getElementById('api-key').value = '';
-  document.getElementById('api-key').focus();
-  showResult('info', `${name} 프리셋 적용됨 — API Key를 입력하세요` + (name === 'ollama' ? ' (Ollama는 키 불필요 — "ollama" 입력)' : ''));
+  if (p.key) {
+    document.getElementById('api-key').value = p.key;
+    showResult('info', `${name} 프리셋 적용 완료 — URL을 사내 서버 IP로 수정 후 연결 테스트하세요`);
+  } else {
+    document.getElementById('api-key').value = '';
+    document.getElementById('api-key').focus();
+    showResult('info', `${name} 프리셋 적용됨 — API Key를 입력하세요`);
+  }
 }
 
 function showResult(type, msg) {

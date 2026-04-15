@@ -19,7 +19,7 @@ export default function HistoryList({ items }: { items: HistoryItem[] }) {
       {items.map((item) => (
         <Link
           key={item.id}
-          href={`/analysis/${item.id}`}
+          href={`/analysis?id=${item.id}`}
           className="glass-card hover-glow-subtle block p-4 cursor-pointer"
         >
           <div className="flex items-center justify-between gap-4">

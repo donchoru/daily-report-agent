@@ -54,7 +54,7 @@ export default function DashboardPage() {
     try {
       const result = await analyzeImage(formData);
       clearInterval(interval);
-      router.push(`/analysis/${result.id}`);
+      router.push(`/analysis?id=${result.id}`);
     } catch (e) {
       clearInterval(interval);
       setUploading(false);

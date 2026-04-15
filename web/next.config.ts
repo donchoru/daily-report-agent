@@ -1,15 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  async rewrites() {
-    return [
-      {
-        source: "/api/backend/:path*",
-        destination: "http://localhost:8700/:path*",
-      },
-    ];
-  },
+  output: "export",
+  basePath: "/web",
 };
 
 export default nextConfig;

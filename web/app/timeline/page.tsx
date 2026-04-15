@@ -76,7 +76,7 @@ export default function TimelinePage() {
       ) : items.length > 0 ? (
         <TimelineChart
           items={items}
-          onDateClick={(id) => router.push(`/analysis/${id}`)}
+          onDateClick={(id) => router.push(`/analysis?id=${id}`)}
         />
       ) : (
         <div className="glass-card p-8 text-center text-zinc-500">

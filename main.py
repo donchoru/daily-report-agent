@@ -14,8 +14,12 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
 
+from pathlib import Path
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
 
@@ -687,6 +691,48 @@ async def seed_demo(req: SeedRequest | None = None):
 
     logger.info("데모 시딩 완료: %d건", len(ids))
     return {"message": f"{len(ids)}건 시딩 완료", "ids": ids}
+
+
+# ── 프론트엔드 정적 파일 서빙 (/web) ─────────────────────────
+# npm/Node.js 없이 python main.py 만으로 프론트+백엔드 동시 서빙
+
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+# HTML 페이지 라우트
+
+@app.get("/web")
+async def _web_root():
+    return FileResponse(_STATIC_DIR / "index.html") if _STATIC_DIR.exists() else HTTPException(404)
+
+
+@app.get("/web/")
+async def _web_index():
+    return FileResponse(_STATIC_DIR / "index.html") if _STATIC_DIR.exists() else HTTPException(404)
+
+
+@app.get("/web/analysis")
+async def _web_analysis():
+    return FileResponse(_STATIC_DIR / "analysis.html") if _STATIC_DIR.exists() else HTTPException(404)
+
+
+@app.get("/web/timeline")
+async def _web_timeline():
+    return FileResponse(_STATIC_DIR / "timeline.html") if _STATIC_DIR.exists() else HTTPException(404)
+
+
+@app.get("/web/compare")
+async def _web_compare():
+    return FileResponse(_STATIC_DIR / "compare.html") if _STATIC_DIR.exists() else HTTPException(404)
+
+
+# JS/CSS 에셋
+if _STATIC_DIR.exists() and (_STATIC_DIR / "_next").exists():
+    app.mount(
+        "/web/_next",
+        StaticFiles(directory=str(_STATIC_DIR / "_next")),
+        name="web-assets",
+    )
+    logger.info("프론트엔드 서빙: http://localhost:8700/web/")
 
 
 # ── 메인 ──────────────────────────────────────────────────────

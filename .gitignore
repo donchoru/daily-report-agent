@@ -14,4 +14,3 @@ web/out/
 # PyInstaller
 build/
 dist/
-*.spec

@@ -27,10 +27,16 @@ def _read_keychain(service: str) -> str:
 
 # ── 시크릿 ─────────────────────────────────────────────────────
 
-GEMINI_API_KEY: str = (
-    os.environ.get("GEMINI_API_KEY", "")
+LLM_BASE_URL: str = os.environ.get(
+    "LLM_BASE_URL",
+    "https://generativelanguage.googleapis.com/v1beta/openai/",
+)
+LLM_API_KEY: str = (
+    os.environ.get("LLM_API_KEY", "")
+    or os.environ.get("GEMINI_API_KEY", "")
     or _read_keychain("GEMINI_API_KEY")
 )
+LLM_MODEL: str = os.environ.get("LLM_MODEL", "gemini-2.0-flash")
 
 # ── 경로 ───────────────────────────────────────────────────────
 # PyInstaller 번들: 정적 파일은 _MEIPASS, DB/로그는 실행파일 옆
@@ -48,9 +54,7 @@ LOGS_DIR = RUNTIME_DIR / "logs"
 
 LOGS_DIR.mkdir(exist_ok=True)
 
-# ── Gemini 설정 ────────────────────────────────────────────────
-
-GEMINI_MODEL: str = "gemini-2.0-flash"
+# ── LLM 설정 ───────────────────────────────────────────────────
 
 # Stage 1: 추출 — 정확도 우선
 EXTRACT_TEMPERATURE: float = 0.1

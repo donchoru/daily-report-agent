@@ -1,27 +1,16 @@
-"""Stage 1: 이미지 → 구조화 데이터 추출 (Gemini Vision)."""
+"""Stage 1: 이미지 → 구조화 데이터 추출 (OpenAI Vision)."""
 
 from __future__ import annotations
 
-import asyncio
+import base64
 import json
 import logging
 
-from google import genai
-from google.genai import types
-
-from config import GEMINI_API_KEY, GEMINI_MODEL, EXTRACT_TEMPERATURE
+from config import LLM_MODEL, EXTRACT_TEMPERATURE
+from analyzer.llm import get_client
 from analyzer.prompts import EXTRACT_SYSTEM, build_extract_prompt
 
 logger = logging.getLogger(__name__)
-
-_client: genai.Client | None = None
-
-
-def _get_client() -> genai.Client:
-    global _client
-    if not _client:
-        _client = genai.Client(api_key=GEMINI_API_KEY)
-    return _client
 
 
 async def extract_data(
@@ -30,29 +19,30 @@ async def extract_data(
     context: str | None = None,
 ) -> dict:
     """이미지에서 제조 일보 데이터를 JSON으로 추출."""
-    client = _get_client()
+    client = get_client()
 
-    image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+    b64 = base64.b64encode(image_bytes).decode()
     user_prompt = build_extract_prompt(context)
 
-    def _call():
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=[
-                types.Content(
-                    role="user",
-                    parts=[image_part, types.Part.from_text(text=user_prompt)],
-                ),
-            ],
-            config=types.GenerateContentConfig(
-                system_instruction=EXTRACT_SYSTEM,
-                temperature=EXTRACT_TEMPERATURE,
-                response_mime_type="application/json",
-            ),
-        )
-        return response.text
-
-    raw = await asyncio.to_thread(_call)
+    response = await client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": EXTRACT_SYSTEM},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:{mime_type};base64,{b64}"},
+                    },
+                    {"type": "text", "text": user_prompt},
+                ],
+            },
+        ],
+        temperature=EXTRACT_TEMPERATURE,
+        response_format={"type": "json_object"},
+    )
+    raw = response.choices[0].message.content
     logger.info("Stage 1 추출 완료 (%d chars)", len(raw))
 
     try:

@@ -2,25 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 
-from google import genai
-from google.genai import types
-
-from config import GEMINI_API_KEY, GEMINI_MODEL, INSIGHT_TEMPERATURE
+from config import LLM_MODEL, INSIGHT_TEMPERATURE
+from analyzer.llm import get_client
 
 logger = logging.getLogger(__name__)
-
-_client: genai.Client | None = None
-
-
-def _get_client() -> genai.Client:
-    global _client
-    if not _client:
-        _client = genai.Client(api_key=GEMINI_API_KEY)
-    return _client
 
 
 CHAT_SYSTEM = """당신은 제조 현장 전문 AI 분석가입니다.
@@ -67,7 +55,7 @@ async def chat_with_analysis(
     memories: list[dict],
 ) -> str:
     """분석 결과를 컨텍스트로 사용자와 대화."""
-    client = _get_client()
+    client = get_client()
 
     # 분석 컨텍스트 구성
     analysis_context = json.dumps(
@@ -92,34 +80,18 @@ async def chat_with_analysis(
         memories=memories_str,
     )
 
-    # 대화 이력 구성
-    contents = []
+    # 메시지 목록 구성: system + 대화 이력 + 현재 메시지
+    messages: list[dict] = [{"role": "system", "content": system}]
     for msg in conversation_history:
-        contents.append(
-            types.Content(
-                role="user" if msg["role"] == "user" else "model",
-                parts=[types.Part.from_text(text=msg["content"])],
-            )
-        )
-    contents.append(
-        types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=message)],
-        )
+        messages.append({"role": msg["role"], "content": msg["content"]})
+    messages.append({"role": "user", "content": message})
+
+    response = await client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=messages,
+        temperature=INSIGHT_TEMPERATURE,
     )
-
-    def _call():
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=system,
-                temperature=INSIGHT_TEMPERATURE,
-            ),
-        )
-        return response.text
-
-    return await asyncio.to_thread(_call)
+    return response.choices[0].message.content
 
 
 async def extract_memories(
@@ -127,7 +99,7 @@ async def extract_memories(
     assistant_response: str,
 ) -> list[dict]:
     """대화에서 장기 보존할 도메인 지식을 추출."""
-    client = _get_client()
+    client = get_client()
 
     prompt = f"""## 사용자 메시지
 {user_message}
@@ -137,24 +109,26 @@ async def extract_memories(
 
 위 대화에서 사용자가 알려준 도메인 지식을 추출하세요."""
 
-    def _call():
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=MEMORY_EXTRACT_SYSTEM,
-                temperature=0.1,
-                response_mime_type="application/json",
-            ),
-        )
-        return response.text
-
-    raw = await asyncio.to_thread(_call)
+    response = await client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": MEMORY_EXTRACT_SYSTEM},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.1,
+        response_format={"type": "json_object"},
+    )
+    raw = response.choices[0].message.content
 
     try:
         result = json.loads(raw)
         if isinstance(result, list):
             return result
+        # json_object 모드는 dict를 반환할 수 있음 — 배열이 감싸인 경우 처리
+        if isinstance(result, dict):
+            for v in result.values():
+                if isinstance(v, list):
+                    return v
     except json.JSONDecodeError:
         pass
     return []

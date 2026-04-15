@@ -1,0 +1,51 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: dra.exe
+            zip_name: dra-windows-x64.zip
+          - os: macos-latest
+            artifact: dra
+            zip_name: dra-macos-arm64.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build executable
+        run: pyinstaller dra.spec --noconfirm
+
+      - name: Zip artifact (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path "dist\dra.exe" -DestinationPath "dist\${{ matrix.zip_name }}"
+
+      - name: Zip artifact (macOS)
+        if: runner.os == 'macOS'
+        run: cd dist && zip -j "${{ matrix.zip_name }}" dra
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ matrix.zip_name }}

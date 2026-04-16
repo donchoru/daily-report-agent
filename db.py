@@ -75,6 +75,39 @@ CREATE TABLE IF NOT EXISTS settings (
     value TEXT NOT NULL,
     updated_at TEXT DEFAULT (datetime('now','localtime'))
 );
+
+-- 구조화 메트릭 (SQL 기반 트렌드/비교용)
+CREATE TABLE IF NOT EXISTS daily_metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    analysis_id TEXT REFERENCES analyses(id),
+    report_date TEXT NOT NULL,
+    department TEXT DEFAULT '',
+    -- 생산
+    prod_target REAL,
+    prod_actual REAL,
+    prod_achievement_rate REAL,
+    prod_unit TEXT DEFAULT 'pcs',
+    -- 품질
+    quality_defect_count REAL,
+    quality_defect_rate REAL,
+    quality_defect_types TEXT,
+    -- 설비
+    equip_uptime_min REAL,
+    equip_downtime_min REAL,
+    equip_utilization_rate REAL,
+    equip_downtime_reason TEXT,
+    -- 인력
+    workforce_count REAL,
+    workforce_absent REAL,
+    workforce_overtime TEXT,
+    -- 기타
+    notes TEXT,
+    raw_json TEXT,
+    created_at TEXT DEFAULT (datetime('now','localtime')),
+    UNIQUE(report_date, department)
+);
+CREATE INDEX IF NOT EXISTS idx_dm_date ON daily_metrics(report_date);
+CREATE INDEX IF NOT EXISTS idx_dm_dept ON daily_metrics(department);
 """
 
 
@@ -422,6 +455,126 @@ class Database:
         cur = await self._db.execute("SELECT key, value FROM settings")
         rows = await cur.fetchall()
         return {r["key"]: r["value"] for r in rows}
+
+    # ── 구조화 메트릭 ─────────────────────────────────────────
+
+    async def upsert_metric(self, m: dict) -> int:
+        """daily_metrics UPSERT (report_date+department 기준)."""
+        cols = [
+            "analysis_id", "report_date", "department",
+            "prod_target", "prod_actual", "prod_achievement_rate", "prod_unit",
+            "quality_defect_count", "quality_defect_rate", "quality_defect_types",
+            "equip_uptime_min", "equip_downtime_min", "equip_utilization_rate",
+            "equip_downtime_reason",
+            "workforce_count", "workforce_absent", "workforce_overtime",
+            "notes", "raw_json",
+        ]
+        placeholders = ", ".join("?" for _ in cols)
+        col_names = ", ".join(cols)
+        # ON CONFLICT → 갱신 (report_date + department 제외)
+        update_cols = [c for c in cols if c not in ("report_date", "department")]
+        update_clause = ", ".join(f"{c} = excluded.{c}" for c in update_cols)
+
+        vals = [m.get(c) for c in cols]
+        cur = await self._db.execute(
+            f"""INSERT INTO daily_metrics ({col_names})
+                VALUES ({placeholders})
+                ON CONFLICT(report_date, department)
+                DO UPDATE SET {update_clause}""",
+            vals,
+        )
+        await self._db.commit()
+        return cur.lastrowid
+
+    async def get_metrics(
+        self,
+        department: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        limit: int = 100,
+    ) -> list[dict]:
+        """메트릭 조회 (필터링)."""
+        conditions: list[str] = []
+        params: list[Any] = []
+        if department:
+            conditions.append("department = ?")
+            params.append(department)
+        if date_from:
+            conditions.append("report_date >= ?")
+            params.append(date_from)
+        if date_to:
+            conditions.append("report_date <= ?")
+            params.append(date_to)
+        where = " AND ".join(conditions) if conditions else "1=1"
+        cur = await self._db.execute(
+            f"""SELECT * FROM daily_metrics
+                WHERE {where} ORDER BY report_date DESC LIMIT ?""",
+            [*params, limit],
+        )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+
+    async def get_metrics_summary(
+        self,
+        department: str | None = None,
+        days: int = 30,
+    ) -> dict:
+        """기간별 평균/최소/최대 집계."""
+        conditions = ["report_date >= date('now', 'localtime', ?)"]
+        params: list[Any] = [f"-{days} days"]
+        if department:
+            conditions.append("department = ?")
+            params.append(department)
+        where = " AND ".join(conditions)
+        cur = await self._db.execute(
+            f"""SELECT
+                    COUNT(*) as count,
+                    AVG(prod_achievement_rate) as avg_achievement,
+                    MIN(prod_achievement_rate) as min_achievement,
+                    MAX(prod_achievement_rate) as max_achievement,
+                    AVG(quality_defect_rate) as avg_defect_rate,
+                    MIN(quality_defect_rate) as min_defect_rate,
+                    MAX(quality_defect_rate) as max_defect_rate,
+                    AVG(equip_utilization_rate) as avg_utilization,
+                    MIN(equip_utilization_rate) as min_utilization,
+                    MAX(equip_utilization_rate) as max_utilization,
+                    AVG(workforce_count) as avg_workforce,
+                    SUM(prod_actual) as total_production
+                FROM daily_metrics WHERE {where}""",
+            params,
+        )
+        row = await cur.fetchone()
+        return dict(row) if row else {}
+
+    async def get_metrics_trend(
+        self,
+        metric: str,
+        department: str | None = None,
+        days: int = 30,
+    ) -> list[dict]:
+        """특정 지표의 날짜별 추이 (차트용)."""
+        allowed = {
+            "prod_target", "prod_actual", "prod_achievement_rate",
+            "quality_defect_count", "quality_defect_rate",
+            "equip_uptime_min", "equip_downtime_min", "equip_utilization_rate",
+            "workforce_count", "workforce_absent",
+        }
+        if metric not in allowed:
+            return []
+        conditions = ["report_date >= date('now', 'localtime', ?)"]
+        params: list[Any] = [f"-{days} days"]
+        if department:
+            conditions.append("department = ?")
+            params.append(department)
+        where = " AND ".join(conditions)
+        cur = await self._db.execute(
+            f"""SELECT report_date, department, {metric} as value
+                FROM daily_metrics WHERE {where}
+                ORDER BY report_date""",
+            params,
+        )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
 
     # ── 분석 업데이트 (재분석 결과 저장) ──────────────────────
 

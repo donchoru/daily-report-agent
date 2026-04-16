@@ -24,6 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from analyzer.chat import chat_with_analysis, extract_memories
+from analyzer.metric_parser import extracted_to_metrics
 from analyzer.drilldown import get_drilldown_links
 from analyzer.extractor import extract_data
 from analyzer.insights import (
@@ -183,6 +184,16 @@ async def analyze(
         file_size=len(content),
         image_hash=image_hash,
     )
+
+    # 구조화 메트릭 적재
+    try:
+        metrics = extracted_to_metrics(extracted, analysis_id, report_date, department)
+        for m in metrics:
+            await db.upsert_metric(m)
+        if metrics:
+            logger.info("메트릭 적재: %s → %d건", analysis_id, len(metrics))
+    except Exception as e:
+        logger.warning("메트릭 적재 실패 (분석은 정상): %s", e)
 
     logger.info("분석 완료: %s (%.2fs)", analysis_id, elapsed)
 
@@ -513,6 +524,76 @@ async def health():
         "status": "ok",
         "timestamp": datetime.now().isoformat(),
         "db_stats": stats,
+    }
+
+
+# ── GET /metrics — 메트릭 목록 조회 ──────────────────────────
+
+@app.get("/metrics")
+async def get_metrics(
+    department: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    limit: int = 100,
+):
+    items = await db.get_metrics(
+        department=department, date_from=date_from, date_to=date_to, limit=limit,
+    )
+    return {"items": items, "count": len(items)}
+
+
+# ── GET /metrics/summary — 기간 집계 ────────────────────────
+
+@app.get("/metrics/summary")
+async def get_metrics_summary(
+    department: str | None = None,
+    days: int = 30,
+):
+    summary = await db.get_metrics_summary(department=department, days=days)
+    return {"summary": summary, "days": days}
+
+
+# ── GET /metrics/trend — 특정 지표 시계열 ────────────────────
+
+@app.get("/metrics/trend")
+async def get_metrics_trend(
+    metric: str = "prod_achievement_rate",
+    department: str | None = None,
+    days: int = 30,
+):
+    data = await db.get_metrics_trend(metric=metric, department=department, days=days)
+    return {"metric": metric, "data": data, "count": len(data)}
+
+
+# ── POST /metrics/backfill — 기존 analyses → daily_metrics ──
+
+@app.post("/metrics/backfill")
+async def backfill_metrics():
+    """기존 analyses 테이블 데이터를 daily_metrics로 일괄 마이그레이션."""
+    cur = await db._db.execute(
+        "SELECT id, report_date, department, extracted_data FROM analyses ORDER BY report_date"
+    )
+    rows = await cur.fetchall()
+    total = 0
+    errors = 0
+    for row in rows:
+        try:
+            extracted = json.loads(row["extracted_data"])
+            metrics = extracted_to_metrics(
+                extracted, row["id"], row["report_date"], row["department"],
+            )
+            for m in metrics:
+                await db.upsert_metric(m)
+            total += len(metrics)
+        except Exception as e:
+            logger.warning("backfill 실패 (id=%s): %s", row["id"], e)
+            errors += 1
+    logger.info("backfill 완료: %d건 적재, %d건 오류", total, errors)
+    return {
+        "message": f"{total}건 마이그레이션 완료",
+        "migrated": total,
+        "errors": errors,
+        "source_rows": len(rows),
     }
 
 

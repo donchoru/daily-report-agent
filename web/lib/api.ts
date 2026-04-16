@@ -122,6 +122,61 @@ export function compareAnalyses(body: {
   });
 }
 
+// ── 메트릭 ───────────────────────────────────────────────────
+
+export function getMetrics(params?: {
+  department?: string;
+  date_from?: string;
+  date_to?: string;
+  limit?: number;
+}) {
+  const q = new URLSearchParams();
+  if (params?.department) q.set("department", params.department);
+  if (params?.date_from) q.set("date_from", params.date_from);
+  if (params?.date_to) q.set("date_to", params.date_to);
+  if (params?.limit) q.set("limit", String(params.limit));
+  return request<{ items: Record<string, unknown>[]; count: number }>(
+    `/metrics?${q}`,
+  );
+}
+
+export function getMetricsSummary(params?: {
+  department?: string;
+  days?: number;
+}) {
+  const q = new URLSearchParams();
+  if (params?.department) q.set("department", params.department);
+  if (params?.days) q.set("days", String(params.days));
+  return request<{ summary: Record<string, number | null>; days: number }>(
+    `/metrics/summary?${q}`,
+  );
+}
+
+export function getMetricsTrend(params?: {
+  metric?: string;
+  department?: string;
+  days?: number;
+}) {
+  const q = new URLSearchParams();
+  if (params?.metric) q.set("metric", params.metric);
+  if (params?.department) q.set("department", params.department);
+  if (params?.days) q.set("days", String(params.days));
+  return request<{
+    metric: string;
+    data: { report_date: string; department: string; value: number | null }[];
+    count: number;
+  }>(`/metrics/trend?${q}`);
+}
+
+export function backfillMetrics() {
+  return request<{
+    message: string;
+    migrated: number;
+    errors: number;
+    source_rows: number;
+  }>("/metrics/backfill", { method: "POST" });
+}
+
 // ── 헬스 ─────────────────────────────────────────────────────
 
 export function getHealth() {

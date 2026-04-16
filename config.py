@@ -37,7 +37,7 @@ LLM_API_KEY: str = (
     or _read_keychain("GEMINI_API_KEY")
     or "not-needed"  # 인하우스 LLM은 키 불필요할 수 있음
 )
-LLM_MODEL: str = os.environ.get("LLM_MODEL", "Qwen/Qwen2.5-72B-Instruct")
+LLM_MODEL: str = os.environ.get("LLM_MODEL", "Qwen/Qwen3-235B-A22B")
 
 # ── 경로 ───────────────────────────────────────────────────────
 # PyInstaller 번들: 정적 파일은 _MEIPASS, DB/로그는 실행파일 옆

@@ -127,13 +127,26 @@ async def analyze(
 
     # Stage 1: 이미지 → 구조화 데이터
     logger.info("분석 시작: %s (image=%s, %d bytes)", analysis_id, image.filename, len(content))
-    extracted = await extract_data(content, image.content_type, context)
+    try:
+        extracted = await extract_data(content, image.content_type, context)
+    except ConnectionError as e:
+        raise HTTPException(502, f"LLM 서버 연결 실패: {e}. 설정에서 Base URL을 확인하세요.")
+    except Exception as e:
+        err = str(e).lower()
+        if any(kw in err for kw in ("connection", "connect", "timeout", "refused")):
+            raise HTTPException(502, f"LLM 서버 연결 실패: {e}. 설정에서 Base URL을 확인하세요.")
+        logger.exception("Stage 1 추출 실패: %s", e)
+        raise HTTPException(500, f"이미지 분석 실패: {e}")
 
     # 과거 데이터 조회 (트렌드용)
     historical = await db.get_recent_extracted(department)
 
     # Stage 2: 데이터 → 인사이트 (관심사 반영)
-    insights = await generate_insights(extracted, historical, context, interests)
+    try:
+        insights = await generate_insights(extracted, historical, context, interests)
+    except Exception as e:
+        logger.exception("Stage 2 인사이트 실패: %s", e)
+        insights = {"anomalies": [], "trends": [], "summary": "인사이트 생성 실패", "action_items": []}
 
     # 헤드라인 생성
     analysis_for_headline = {
@@ -142,7 +155,11 @@ async def analyze(
         "report_date": report_date,
         "department": department,
     }
-    headlines = await generate_headlines(analysis_for_headline, interests)
+    try:
+        headlines = await generate_headlines(analysis_for_headline, interests)
+    except Exception as e:
+        logger.warning("헤드라인 생성 실패: %s", e)
+        headlines = {"main_headline": "분석 완료", "sub_headlines": [], "sentiment": "neutral"}
 
     # 드릴다운 링크
     drilldown = get_drilldown_links(extracted, insights)

@@ -1,4 +1,4 @@
-"""분석 결과 기반 후속 대화 + 장기 메모리 추출."""
+"""분석 결과 기반 후속 대화 + 장기 메모리 추출 (vLLM 호환)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 import logging
 
 from config import LLM_MODEL, INSIGHT_TEMPERATURE
-from analyzer.llm import get_client
+from analyzer.llm import get_client, safe_completion, parse_json_response
 
 logger = logging.getLogger(__name__)
 
@@ -99,8 +99,6 @@ async def extract_memories(
     assistant_response: str,
 ) -> list[dict]:
     """대화에서 장기 보존할 도메인 지식을 추출."""
-    client = get_client()
-
     prompt = f"""## 사용자 메시지
 {user_message}
 
@@ -109,26 +107,20 @@ async def extract_memories(
 
 위 대화에서 사용자가 알려준 도메인 지식을 추출하세요."""
 
-    response = await client.chat.completions.create(
-        model=LLM_MODEL,
+    raw = await safe_completion(
         messages=[
             {"role": "system", "content": MEMORY_EXTRACT_SYSTEM},
             {"role": "user", "content": prompt},
         ],
         temperature=0.1,
-        response_format={"type": "json_object"},
+        expect_json=True,
     )
-    raw = response.choices[0].message.content
 
-    try:
-        result = json.loads(raw)
-        if isinstance(result, list):
-            return result
-        # json_object 모드는 dict를 반환할 수 있음 — 배열이 감싸인 경우 처리
-        if isinstance(result, dict):
-            for v in result.values():
-                if isinstance(v, list):
-                    return v
-    except json.JSONDecodeError:
-        pass
+    result = parse_json_response(raw)
+    if isinstance(result, list):
+        return result
+    if isinstance(result, dict):
+        for v in result.values():
+            if isinstance(v, list):
+                return v
     return []

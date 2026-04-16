@@ -5,12 +5,12 @@ import { getSettings, saveSettings, testSettings } from "@/lib/api";
 import { showToast } from "@/components/Toast";
 
 const MODEL_PRESETS = [
+  "Qwen/Qwen3-235B-A22B",
+  "Qwen/Qwen3-32B",
+  "Qwen/Qwen2.5-VL-72B-Instruct",
   "Qwen/Qwen2.5-72B-Instruct",
-  "Qwen/Qwen2.5-32B-Instruct",
-  "Qwen/Qwen2.5-14B-Instruct",
   "meta-llama/Llama-3.1-70B-Instruct",
   "LGAI-EXAONE/EXAONE-3.5-32B-Instruct",
-  "mistralai/Mistral-Large-Instruct-2411",
 ];
 
 export default function SettingsPage() {
@@ -153,7 +153,7 @@ export default function SettingsPage() {
             value={model}
             onChange={(e) => setModel(e.target.value)}
             list="model-presets"
-            placeholder="Qwen/Qwen2.5-72B-Instruct"
+            placeholder="Qwen/Qwen3-235B-A22B"
             className="glass-input w-full px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500"
           />
           <datalist id="model-presets">
@@ -163,6 +163,9 @@ export default function SettingsPage() {
           </datalist>
           <p className="text-xs text-zinc-500">
             직접 입력하거나 프리셋에서 선택하세요
+          </p>
+          <p className="text-xs text-amber-400/80 mt-1">
+            Vision 모델(VL) 사용 시 이미지 직접 분석, 텍스트 모델 사용 시 OCR 자동 전환
           </p>
         </div>
 

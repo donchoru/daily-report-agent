@@ -135,3 +135,29 @@ export function seedDemo() {
     method: "POST",
   });
 }
+
+// ── 설정 ─────────────────────────────────────────────────────
+
+export interface SettingsData {
+  llm_base_url: string;
+  llm_api_key: string;
+  llm_model: string;
+}
+
+export function getSettings() {
+  return request<SettingsData>("/settings");
+}
+
+export function saveSettings(data: SettingsData) {
+  return request<{ message: string }>("/settings", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function testSettings(data?: Partial<SettingsData>) {
+  return request<{ success: boolean; message: string; model?: string }>("/settings/test", {
+    method: "POST",
+    body: JSON.stringify(data ?? {}),
+  });
+}

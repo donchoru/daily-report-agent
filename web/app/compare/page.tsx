@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { compareAnalyses, getHistory } from "@/lib/api";
+import { showToast } from "@/components/Toast";
 import type { HistoryItem, ComparisonResult } from "@/lib/types";
 import CompareForm from "@/components/CompareForm";
 import ComparisonReport from "@/components/ComparisonReport";
@@ -26,7 +27,7 @@ export default function ComparePage() {
       setResult(res.comparison);
       setElapsed(res.processing_time_sec);
     } catch (e) {
-      alert("비교 분석 실패: " + (e instanceof Error ? e.message : "오류"));
+      showToast("비교 분석 실패: " + (e instanceof Error ? e.message : "오류"), "error");
     } finally {
       setLoading(false);
     }

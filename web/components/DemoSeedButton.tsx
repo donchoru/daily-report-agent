@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { seedDemo } from "@/lib/api";
+import { showToast } from "@/components/Toast";
 
 export default function DemoSeedButton({ onSeeded }: { onSeeded?: () => void }) {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export default function DemoSeedButton({ onSeeded }: { onSeeded?: () => void }) 
       setDone(true);
       onSeeded?.();
     } catch (e) {
-      alert("시딩 실패: " + (e instanceof Error ? e.message : "알 수 없는 오류"));
+      showToast("시딩 실패: " + (e instanceof Error ? e.message : "알 수 없는 오류"), "error");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { reanalyze } from "@/lib/api";
+import { showToast } from "@/components/Toast";
 import type { ReanalysisResult } from "@/lib/types";
 import ReanalysisResultView from "./ReanalysisResult";
 
@@ -32,7 +33,7 @@ export default function PerspectiveReanalyzer({
       const res = await reanalyze(analysisId, perspective);
       setResult(res.result);
     } catch {
-      alert("재분석 실패");
+      showToast("재분석 실패", "error");
     } finally {
       setLoading(false);
     }

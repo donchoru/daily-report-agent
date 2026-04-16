@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import Nav from "@/components/Nav";
+import { ToastContainer } from "@/components/Toast";
 import "./globals.css";
-
-const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "제조 일보 AI 분석",
@@ -13,11 +11,20 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className="dark">
-      <body className={`${geist.className} min-h-screen`}>
+      <head>
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
+      <body className="min-h-screen">
         <Nav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-12">
           {children}
         </main>
+        <ToastContainer />
       </body>
     </html>
   );

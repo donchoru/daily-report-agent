@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { analyzeImage, getHistory, getHealth } from "@/lib/api";
+import { showToast } from "@/components/Toast";
 import type { HistoryItem } from "@/lib/types";
 import ImageUploader from "@/components/ImageUploader";
 import AnalysisLoading from "@/components/AnalysisLoading";
@@ -58,7 +59,7 @@ export default function DashboardPage() {
     } catch (e) {
       clearInterval(interval);
       setUploading(false);
-      alert("분석 실패: " + (e instanceof Error ? e.message : "오류"));
+      showToast("분석 실패: " + (e instanceof Error ? e.message : "오류"), "error");
     }
   }
 

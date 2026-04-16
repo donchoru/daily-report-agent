@@ -7,6 +7,7 @@ const links = [
   { href: "/", label: "대시보드" },
   { href: "/timeline", label: "타임라인" },
   { href: "/compare", label: "비교 분석" },
+  { href: "/settings", label: "설정" },
 ];
 
 export default function Nav() {
@@ -29,22 +30,24 @@ export default function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                className={`relative px-3 py-1.5 rounded-lg text-sm transition-colors ${
                   active
-                    ? "bg-indigo-500/15 text-indigo-300"
+                    ? "bg-violet-500/15 text-violet-300"
                     : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
                 }`}
               >
                 {l.label}
+                {active && (
+                  <span
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 rounded-full"
+                    style={{
+                      background: "linear-gradient(90deg, #8b5cf6, #6366f1)",
+                    }}
+                  />
+                )}
               </Link>
             );
           })}
-          <a
-            href="/web/settings"
-            className="px-3 py-1.5 rounded-lg text-sm transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
-          >
-            설정
-          </a>
         </div>
       </div>
     </nav>

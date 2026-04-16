@@ -1,71 +1,129 @@
-"""OCR 모듈 — 한국어 우선, 폴백 체인.
+"""OCR 모듈 — 한국어 ONNX 모델 번들 (tesseract 불필요).
 
-우선순위:
-1. pytesseract + tesseract (한국어 지원, 가장 정확)
-2. rapidocr-onnxruntime (tesseract 없을 때, 숫자/영문 위주)
+RapidOCR + 한국어 PaddleOCR ONNX 모델로 동작.
+외부 설치 없이 바이너리에 모두 포함.
 """
 
 from __future__ import annotations
 
 import logging
-from io import BytesIO
-
-from PIL import Image
+import sys
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# 모델 경로 — PyInstaller 번들/개발 모드 모두 지원
+if getattr(sys, "frozen", False):
+    _BASE = Path(sys._MEIPASS)
+else:
+    _BASE = Path(__file__).resolve().parent.parent
+
+_KOREAN_REC_MODEL = _BASE / "models" / "korean" / "rec_model.onnx"
+_KOREAN_DICT = _BASE / "models" / "korean" / "dict.txt"
+
+_ocr_instance = None
+
+
+def _get_ocr():
+    """한국어 모델로 RapidOCR 인스턴스 생성 (싱글톤)."""
+    global _ocr_instance
+    if _ocr_instance is not None:
+        return _ocr_instance
+
+    from rapidocr_onnxruntime import RapidOCR
+    from rapidocr_onnxruntime.utils import read_yaml, concat_model_path
+    import rapidocr_onnxruntime
+
+    pkg_dir = Path(rapidocr_onnxruntime.__file__).resolve().parent
+    config = read_yaml(str(pkg_dir / "config.yaml"))
+    config = concat_model_path(config)
+
+    # 한국어 인식 모델로 교체
+    if _KOREAN_REC_MODEL.exists() and _KOREAN_DICT.exists():
+        config["Rec"]["model_path"] = str(_KOREAN_REC_MODEL)
+        config["Rec"]["keys_path"] = str(_KOREAN_DICT)
+        logger.info("한국어 OCR 모델 로드: %s", _KOREAN_REC_MODEL.name)
+    else:
+        logger.warning("한국어 모델 없음 — 기본 모델 사용")
+
+    # config를 직접 주입하여 생성 (kwargs 파싱 우회)
+    ocr = object.__new__(RapidOCR)
+    ocr._init_from_config(config)
+    _ocr_instance = ocr
+    return _ocr_instance
+
+
+def _init_rapidocr_from_config(config: dict):
+    """RapidOCR를 config dict로 직접 초기화."""
+    from rapidocr_onnxruntime import RapidOCR
+    from rapidocr_onnxruntime.utils import LoadImage
+
+    ocr = object.__new__(RapidOCR)
+
+    global_config = config["Global"]
+    ocr.print_verbose = global_config["print_verbose"]
+    ocr.text_score = global_config["text_score"]
+    ocr.min_height = global_config["min_height"]
+    ocr.width_height_ratio = global_config["width_height_ratio"]
+
+    ocr.use_text_det = global_config["use_text_det"]
+    if ocr.use_text_det:
+        TextDetector = ocr.init_module(config["Det"]["module_name"], config["Det"]["class_name"])
+        ocr.text_detector = TextDetector(config["Det"])
+
+    TextRecognizer = ocr.init_module(config["Rec"]["module_name"], config["Rec"]["class_name"])
+    ocr.text_recognizer = TextRecognizer(config["Rec"])
+
+    ocr.use_angle_cls = global_config["use_angle_cls"]
+    if ocr.use_angle_cls:
+        TextClassifier = ocr.init_module(config["Cls"]["module_name"], config["Cls"]["class_name"])
+        ocr.text_cls = TextClassifier(config["Cls"])
+
+    ocr.load_img = LoadImage()
+    return ocr
+
 
 def ocr_image(image_bytes: bytes) -> str:
-    """이미지에서 텍스트 추출. tesseract 우선, rapidocr 폴백."""
-    # 1차: pytesseract (한국어 지원)
-    text = _try_tesseract(image_bytes)
-    if text:
-        return text
-
-    # 2차: RapidOCR (설치 안 되어도 무시)
-    text = _try_rapidocr(image_bytes)
-    if text:
-        return text
-
-    return "(이미지에서 텍스트를 인식하지 못했습니다. tesseract를 설치하면 한국어 OCR이 가능합니다.)"
-
-
-def _try_tesseract(image_bytes: bytes) -> str | None:
-    """pytesseract로 한국어 OCR."""
+    """이미지에서 텍스트 추출 (한국어 ONNX 모델)."""
     try:
-        import pytesseract
-    except ImportError:
-        return None
-
-    try:
-        img = Image.open(BytesIO(image_bytes))
-        # 한국어 + 영어 + 숫자
-        text = pytesseract.image_to_string(img, lang="kor+eng")
-        text = text.strip()
-        if text:
-            logger.info("tesseract OCR 완료: %d자", len(text))
-            return text
-    except Exception as e:
-        logger.warning("tesseract 실패: %s", e)
-    return None
-
-
-def _try_rapidocr(image_bytes: bytes) -> str | None:
-    """RapidOCR 폴백 (한국어 약함, 숫자 OK)."""
-    try:
-        from rapidocr_onnxruntime import RapidOCR
-    except ImportError:
-        return None
-
-    try:
-        ocr = RapidOCR()
+        ocr = _get_ocr_safe()
         result, _ = ocr(image_bytes)
+
         if not result:
-            return None
+            return "(이미지에서 텍스트를 인식하지 못했습니다)"
+
         lines = [item[1] for item in result]
         text = "\n".join(lines)
-        logger.info("RapidOCR 완료: %d줄, %d자", len(lines), len(text))
+        logger.info("OCR 완료: %d줄, %d자", len(lines), len(text))
         return text
+
+    except ImportError:
+        return "(OCR 라이브러리가 없습니다. rapidocr-onnxruntime을 설치하세요.)"
     except Exception as e:
-        logger.warning("RapidOCR 실패: %s", e)
-    return None
+        logger.exception("OCR 실패: %s", e)
+        return f"(OCR 처리 중 오류: {e})"
+
+
+def _get_ocr_safe():
+    """한국어 모델로 RapidOCR 인스턴스 생성 (싱글톤)."""
+    global _ocr_instance
+    if _ocr_instance is not None:
+        return _ocr_instance
+
+    from rapidocr_onnxruntime.utils import read_yaml, concat_model_path
+    import rapidocr_onnxruntime
+
+    pkg_dir = Path(rapidocr_onnxruntime.__file__).resolve().parent
+    config = read_yaml(str(pkg_dir / "config.yaml"))
+    config = concat_model_path(config)
+
+    # 한국어 인식 모델로 교체
+    if _KOREAN_REC_MODEL.exists() and _KOREAN_DICT.exists():
+        config["Rec"]["model_path"] = str(_KOREAN_REC_MODEL)
+        config["Rec"]["keys_path"] = str(_KOREAN_DICT)
+        logger.info("한국어 OCR 모델 로드: %s", _KOREAN_REC_MODEL.name)
+    else:
+        logger.warning("한국어 모델 없음 — 기본 모델 사용")
+
+    _ocr_instance = _init_rapidocr_from_config(config)
+    return _ocr_instance

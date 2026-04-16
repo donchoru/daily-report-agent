@@ -821,6 +821,14 @@ if _STATIC_DIR.exists() and (_STATIC_DIR / "_next").exists():
     )
     logger.info("프론트엔드 서빙: http://localhost:8700/web/")
 
+# 폰트 (폐쇄망 — CDN 대신 로컬 서빙)
+if _STATIC_DIR.exists() and (_STATIC_DIR / "fonts").exists():
+    app.mount(
+        "/web/fonts",
+        StaticFiles(directory=str(_STATIC_DIR / "fonts")),
+        name="web-fonts",
+    )
+
 
 # ── 메인 ──────────────────────────────────────────────────────
 

@@ -5,12 +5,12 @@ import { getSettings, saveSettings, testSettings } from "@/lib/api";
 import { showToast } from "@/components/Toast";
 
 const MODEL_PRESETS = [
-  "gemini-2.0-flash",
-  "gemini-2.5-flash-preview-04-17",
-  "gemini-1.5-pro",
-  "gpt-4o",
-  "gpt-4o-mini",
-  "claude-sonnet-4-6",
+  "Qwen/Qwen2.5-72B-Instruct",
+  "Qwen/Qwen2.5-32B-Instruct",
+  "Qwen/Qwen2.5-14B-Instruct",
+  "meta-llama/Llama-3.1-70B-Instruct",
+  "LGAI-EXAONE/EXAONE-3.5-32B-Instruct",
+  "mistralai/Mistral-Large-Instruct-2411",
 ];
 
 export default function SettingsPage() {
@@ -112,11 +112,11 @@ export default function SettingsPage() {
             type="url"
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
-            placeholder="https://generativelanguage.googleapis.com/v1beta"
+            placeholder="http://llm-server:8000/v1"
             className="glass-input w-full px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500"
           />
           <p className="text-xs text-zinc-500">
-            Gemini, OpenAI, 또는 호환 API의 Base URL
+            vLLM, Ollama, 또는 OpenAI 호환 API의 Base URL
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export default function SettingsPage() {
             value={model}
             onChange={(e) => setModel(e.target.value)}
             list="model-presets"
-            placeholder="gemini-2.0-flash"
+            placeholder="Qwen/Qwen2.5-72B-Instruct"
             className="glass-input w-full px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500"
           />
           <datalist id="model-presets">

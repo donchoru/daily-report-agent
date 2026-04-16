@@ -11,14 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className="dark">
-      <head>
-        <link
-          rel="stylesheet"
-          as="style"
-          crossOrigin="anonymous"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-        />
-      </head>
+      <head />
       <body className="min-h-screen">
         <Nav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-12">

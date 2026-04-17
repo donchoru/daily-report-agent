@@ -1,14 +1,17 @@
 """공유 OpenAI 클라이언트 — any OpenAI-compatible endpoint.
 
 인하우스 vLLM/Ollama 호환: response_format 미지원 시 자동 폴백.
+FLOPI 검증 패턴 적용: URL 정규화, keepalive 비활성화, timeout 세분화.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 
+import httpx
 from openai import AsyncOpenAI
 
 import config
@@ -18,10 +21,43 @@ logger = logging.getLogger(__name__)
 _client: AsyncOpenAI | None = None
 
 
+def _normalize_base_url(url: str) -> str:
+    """사내 LLM URL 정규화 — FLOPI 검증 패턴."""
+    url = url.strip().rstrip("/")
+    if url.endswith("/chat/completions"):
+        url = url.removesuffix("/chat/completions")
+        logger.info("base_url에서 /chat/completions 자동 제거: %s", url)
+    if url and not url.startswith(("http://", "https://")):
+        url = f"http://{url}"
+        logger.info("base_url에 http:// 자동 추가: %s", url)
+    return url
+
+
 def get_client() -> AsyncOpenAI:
     global _client
     if not _client:
-        _client = AsyncOpenAI(base_url=config.LLM_BASE_URL, api_key=config.LLM_API_KEY)
+        base_url = _normalize_base_url(config.LLM_BASE_URL)
+        api_key = config.LLM_API_KEY or "sk-placeholder"
+        ssl_verify = os.getenv("LLM_SSL_VERIFY", "true").lower() != "false"
+        _client = AsyncOpenAI(
+            base_url=base_url,
+            api_key=api_key,
+            max_retries=0,
+            http_client=httpx.AsyncClient(
+                verify=ssl_verify,
+                timeout=httpx.Timeout(
+                    connect=10.0,
+                    read=120.0,
+                    write=10.0,
+                    pool=10.0,
+                ),
+                limits=httpx.Limits(
+                    max_keepalive_connections=0,
+                    keepalive_expiry=0,
+                ),
+            ),
+        )
+        logger.info("LLM client 생성: %s (model=%s)", base_url, config.LLM_MODEL)
     return _client
 
 

@@ -847,16 +847,25 @@ async def save_settings(req: SettingsRequest):
 async def test_settings(req: SettingsRequest | None = None):
     """폼에 입력한 값으로 직접 LLM 연결 테스트 (저장 불필요)."""
     import httpx
+    import os as _os
     from openai import AsyncOpenAI
-    base_url = (req.llm_base_url if req and req.llm_base_url else None) or config.LLM_BASE_URL
-    api_key = (req.llm_api_key if req and req.llm_api_key else None) or config.LLM_API_KEY
+    from analyzer.llm import _normalize_base_url
+
+    raw_url = (req.llm_base_url if req and req.llm_base_url else None) or config.LLM_BASE_URL
+    base_url = _normalize_base_url(raw_url)
+    api_key = (req.llm_api_key if req and req.llm_api_key else None) or config.LLM_API_KEY or "sk-placeholder"
     model = (req.llm_model if req and req.llm_model else None) or config.LLM_MODEL
+    ssl_verify = _os.getenv("LLM_SSL_VERIFY", "true").lower() != "false"
     try:
         client = AsyncOpenAI(
             base_url=base_url,
             api_key=api_key,
             max_retries=0,
-            timeout=httpx.Timeout(30.0, connect=10.0),
+            http_client=httpx.AsyncClient(
+                verify=ssl_verify,
+                timeout=httpx.Timeout(connect=10.0, read=30.0, write=10.0, pool=10.0),
+                limits=httpx.Limits(max_keepalive_connections=0, keepalive_expiry=0),
+            ),
         )
         resp = await client.chat.completions.create(
             model=model,
@@ -869,7 +878,6 @@ async def test_settings(req: SettingsRequest | None = None):
     except Exception as e:
         err_type = type(e).__name__
         logger.warning("LLM 연결 테스트 실패 [%s]: %s", err_type, e)
-        # 사용자에게 유용한 힌트 추가
         hint = ""
         err_msg = str(e).lower()
         if "connection" in err_msg or "connect" in err_msg:
@@ -878,6 +886,8 @@ async def test_settings(req: SettingsRequest | None = None):
             hint = " (서버 응답 시간 초과)"
         elif "401" in err_msg or "auth" in err_msg:
             hint = " (API 키가 잘못되었습니다)"
+        elif "404" in err_msg:
+            hint = f" (모델 '{model}'을 찾을 수 없습니다. 모델명을 확인하세요)"
         return {"status": "error", "message": f"[{err_type}] {e}{hint}"}
 
 

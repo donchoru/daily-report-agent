@@ -163,27 +163,35 @@ async def analyze(
         headlines = {"main_headline": "분석 완료", "sub_headlines": [], "sentiment": "neutral"}
 
     # 드릴다운 링크
-    drilldown = get_drilldown_links(extracted, insights)
+    try:
+        drilldown = get_drilldown_links(extracted, insights)
+    except Exception as e:
+        logger.warning("드릴다운 링크 생성 실패: %s", e)
+        drilldown = []
 
     elapsed = round(time.time() - start, 2)
 
     # DB 저장
-    await db.save_analysis(
-        analysis_id=analysis_id,
-        report_date=report_date,
-        report_type=report_type,
-        department=department,
-        extracted_data=extracted,
-        insights=insights,
-        processing_time_sec=elapsed,
-    )
-    await db.save_image_meta(
-        analysis_id=analysis_id,
-        filename=image.filename or "unknown",
-        mime_type=image.content_type,
-        file_size=len(content),
-        image_hash=image_hash,
-    )
+    try:
+        await db.save_analysis(
+            analysis_id=analysis_id,
+            report_date=report_date,
+            report_type=report_type,
+            department=department,
+            extracted_data=extracted,
+            insights=insights,
+            processing_time_sec=elapsed,
+        )
+        await db.save_image_meta(
+            analysis_id=analysis_id,
+            filename=image.filename or "unknown",
+            mime_type=image.content_type,
+            file_size=len(content),
+            image_hash=image_hash,
+        )
+    except Exception as e:
+        logger.exception("DB 저장 실패: %s", e)
+        raise HTTPException(500, f"분석은 완료했으나 DB 저장 실패: {e}")
 
     # 구조화 메트릭 적재
     try:

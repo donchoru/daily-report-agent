@@ -211,7 +211,7 @@ export function saveSettings(data: SettingsData) {
 }
 
 export function testSettings(data?: Partial<SettingsData>) {
-  return request<{ success: boolean; message: string; model?: string }>("/settings/test", {
+  return request<{ status?: string; success?: boolean; message?: string; model?: string; reply?: string }>("/settings/test", {
     method: "POST",
     body: JSON.stringify(data ?? {}),
   });

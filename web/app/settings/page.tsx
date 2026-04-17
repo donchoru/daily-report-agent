@@ -67,10 +67,12 @@ export default function SettingsPage() {
         llm_api_key: apiKey,
         llm_model: model,
       });
-      setTestResult({ success: res.success, message: res.message });
+      const ok = res.status === "ok" || res.success === true;
+      const msg = res.reply || res.message || (ok ? "연결 성공" : "연결 실패");
+      setTestResult({ success: ok, message: ok ? `${res.model}: ${msg}` : msg });
       showToast(
-        res.success ? "연결 성공" : "연결 실패",
-        res.success ? "success" : "error",
+        ok ? "연결 성공" : "연결 실패",
+        ok ? "success" : "error",
       );
     } catch (e) {
       const msg = e instanceof Error ? e.message : "연결 실패";

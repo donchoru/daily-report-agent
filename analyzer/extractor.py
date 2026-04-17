@@ -13,7 +13,7 @@ import json
 import logging
 
 from config import LLM_MODEL, EXTRACT_TEMPERATURE
-from analyzer.llm import get_client, safe_completion, parse_json_response
+from analyzer.llm import get_client, safe_completion, parse_json_response, _is_gemini_model
 from analyzer.prompts import EXTRACT_SYSTEM, build_extract_prompt
 
 logger = logging.getLogger(__name__)
@@ -72,49 +72,31 @@ async def _extract_with_vision(
     b64 = base64.b64encode(image_bytes).decode()
     user_prompt = build_extract_prompt(context)
 
-    try:
-        response = await client.chat.completions.create(
-            model=LLM_MODEL,
-            messages=[
-                {"role": "system", "content": EXTRACT_SYSTEM},
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:{mime_type};base64,{b64}"},
-                        },
-                        {"type": "text", "text": user_prompt},
-                    ],
-                },
-            ],
-            temperature=EXTRACT_TEMPERATURE,
-            response_format={"type": "json_object"},
-        )
-    except Exception as e:
-        err = str(e).lower()
-        if any(kw in err for kw in ("response_format", "json_object", "extra inputs")):
-            logger.info("response_format 미지원 — 폴백")
-            enhanced = user_prompt + "\n\n반드시 JSON으로만 응답하세요."
-            response = await client.chat.completions.create(
-                model=LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": EXTRACT_SYSTEM},
+    # Qwen/vLLM: response_format 사용 안 함 (peer closed 방지)
+    kwargs: dict = {
+        "model": LLM_MODEL,
+        "messages": [
+            {"role": "system", "content": EXTRACT_SYSTEM},
+            {
+                "role": "user",
+                "content": [
                     {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:{mime_type};base64,{b64}"},
-                            },
-                            {"type": "text", "text": enhanced},
-                        ],
+                        "type": "image_url",
+                        "image_url": {"url": f"data:{mime_type};base64,{b64}"},
                     },
+                    {"type": "text", "text": user_prompt},
                 ],
-                temperature=EXTRACT_TEMPERATURE,
-            )
-        else:
-            raise
+            },
+        ],
+        "temperature": EXTRACT_TEMPERATURE,
+    }
+    if _is_gemini_model():
+        kwargs["response_format"] = {"type": "json_object"}
+    else:
+        # Qwen: 프롬프트로 JSON 유도
+        kwargs["messages"][1]["content"][-1]["text"] += "\n\n반드시 JSON으로만 응답하세요."
+
+    response = await client.chat.completions.create(**kwargs)
 
     raw = response.choices[0].message.content
     logger.info("Vision 추출 완료 (%d chars)", len(raw))

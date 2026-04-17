@@ -10,18 +10,7 @@ permissions:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            artifact: dra.exe
-            zip_name: dra-windows-x64.zip
-          - os: macos-latest
-            artifact: dra
-            zip_name: dra-macos-arm64.zip
-
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -38,15 +27,10 @@ jobs:
       - name: Build executable
         run: pyinstaller dra.spec --noconfirm
 
-      - name: Zip artifact (Windows)
-        if: runner.os == 'Windows'
-        run: Compress-Archive -Path "dist\dra.exe" -DestinationPath "dist\${{ matrix.zip_name }}"
-
-      - name: Zip artifact (macOS)
-        if: runner.os == 'macOS'
-        run: cd dist && zip -j "${{ matrix.zip_name }}" dra
+      - name: Zip artifact
+        run: Compress-Archive -Path "dist\dra.exe" -DestinationPath "dist\dra-windows-x64.zip"
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/${{ matrix.zip_name }}
+          files: dist/dra-windows-x64.zip

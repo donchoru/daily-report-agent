@@ -216,3 +216,10 @@ export function testSettings(data?: Partial<SettingsData>) {
     body: JSON.stringify(data ?? {}),
   });
 }
+
+export function fetchModels(data?: Partial<SettingsData>) {
+  return request<{ models: string[] }>("/settings/models", {
+    method: "POST",
+    body: JSON.stringify(data ?? {}),
+  });
+}

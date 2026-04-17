@@ -843,6 +843,32 @@ async def save_settings(req: SettingsRequest):
     return {"status": "ok", "message": "설정이 저장되었습니다"}
 
 
+@app.post("/settings/models")
+async def list_models(req: SettingsRequest | None = None):
+    """LLM 서버에서 사용 가능한 모델 목록 조회 (/v1/models)."""
+    import httpx
+    import os as _os
+    from analyzer.llm import _normalize_base_url
+
+    raw_url = (req.llm_base_url if req and req.llm_base_url else None) or config.LLM_BASE_URL
+    base_url = _normalize_base_url(raw_url)
+    api_key = (req.llm_api_key if req and req.llm_api_key else None) or config.LLM_API_KEY or "sk-placeholder"
+    ssl_verify = _os.getenv("LLM_SSL_VERIFY", "true").lower() != "false"
+
+    try:
+        async with httpx.AsyncClient(verify=ssl_verify, timeout=httpx.Timeout(connect=10.0, read=15.0)) as client:
+            resp = await client.get(
+                f"{base_url}/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            models = [m["id"] for m in data.get("data", [])]
+            return {"models": models}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"모델 목록 조회 실패: {e}")
+
+
 @app.post("/settings/test")
 async def test_settings(req: SettingsRequest | None = None):
     """폼에 입력한 값으로 직접 LLM 연결 테스트 (저장 불필요)."""

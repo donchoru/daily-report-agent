@@ -1,18 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSettings, saveSettings, testSettings } from "@/lib/api";
+import { getSettings, saveSettings, testSettings, fetchModels } from "@/lib/api";
 import { showToast } from "@/components/Toast";
-
-const MODEL_PRESETS = [
-  "Qwen/Qwen3.5-397B-A17B-FP8",
-  "Qwen/Qwen3-235B-A22B",
-  "Qwen/Qwen3-32B",
-  "Qwen/Qwen2.5-VL-72B-Instruct",
-  "Qwen/Qwen2.5-72B-Instruct",
-  "meta-llama/Llama-3.1-70B-Instruct",
-  "LGAI-EXAONE/EXAONE-3.5-32B-Instruct",
-];
 
 export default function SettingsPage() {
   const [baseUrl, setBaseUrl] = useState("");
@@ -26,6 +16,8 @@ export default function SettingsPage() {
     success: boolean;
     message: string;
   } | null>(null);
+  const [remoteModels, setRemoteModels] = useState<string[]>([]);
+  const [fetchingModels, setFetchingModels] = useState(false);
 
   useEffect(() => {
     getSettings()
@@ -39,6 +31,33 @@ export default function SettingsPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleFetchModels() {
+    if (!baseUrl) {
+      showToast("Base URL을 먼저 입력하세요", "error");
+      return;
+    }
+    setFetchingModels(true);
+    try {
+      const res = await fetchModels({
+        llm_base_url: baseUrl,
+        llm_api_key: apiKey,
+      });
+      setRemoteModels(res.models);
+      if (res.models.length > 0) {
+        if (!model || !res.models.includes(model)) {
+          setModel(res.models[0]);
+        }
+        showToast(`${res.models.length}개 모델 발견`, "success");
+      } else {
+        showToast("사용 가능한 모델이 없습니다", "error");
+      }
+    } catch (e) {
+      showToast("모델 목록 조회 실패", "error");
+    } finally {
+      setFetchingModels(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -150,22 +169,50 @@ export default function SettingsPage() {
 
         {/* Model */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-zinc-300">모델</label>
-          <input
-            type="text"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            list="model-presets"
-            placeholder="Qwen/Qwen3-235B-A22B"
-            className="glass-input w-full px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500"
-          />
-          <datalist id="model-presets">
-            {MODEL_PRESETS.map((m) => (
-              <option key={m} value={m} />
-            ))}
-          </datalist>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-zinc-300">모델</label>
+            <button
+              type="button"
+              onClick={handleFetchModels}
+              disabled={fetchingModels}
+              className="text-xs text-violet-400 hover:text-violet-300 transition-colors disabled:text-zinc-500"
+            >
+              {fetchingModels ? (
+                <span className="flex items-center gap-1">
+                  <span className="animate-spin w-3 h-3 border border-violet-500/20 border-t-violet-500 rounded-full" />
+                  조회 중...
+                </span>
+              ) : (
+                "서버에서 모델 불러오기"
+              )}
+            </button>
+          </div>
+
+          {remoteModels.length > 0 ? (
+            <select
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="glass-input w-full px-4 py-3 text-sm text-zinc-200 bg-transparent"
+            >
+              {remoteModels.map((m) => (
+                <option key={m} value={m} className="bg-zinc-900">
+                  {m}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="서버에서 모델을 불러오거나 직접 입력"
+              className="glass-input w-full px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500"
+            />
+          )}
           <p className="text-xs text-zinc-500">
-            직접 입력하거나 프리셋에서 선택하세요
+            {remoteModels.length > 0
+              ? `${remoteModels.length}개 모델 사용 가능`
+              : "Base URL 입력 후 \"서버에서 모델 불러오기\"를 클릭하세요"}
           </p>
           <p className="text-xs text-amber-400/80 mt-1">
             Qwen3.5/VL 모델은 이미지 직접 분석, 텍스트 전용 모델은 OCR 자동 전환
